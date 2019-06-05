@@ -1,0 +1,115 @@
+html {
+    min-height: 100%;
+    width: 100%;
+}
+
+body{
+    overflow: auto;
+    font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+    margin: 0px;
+    padding: 0px;
+    font-size: 1.2em;
+    position: absolute;
+    width: 100%;
+    min-height: 100%;
+    top: 0px;
+    left: 0px;
+    color: rgb(35,35,35);
+    background: rgb(250,250,250);
+}
+
+.gradientColorJoomla{
+    background: rgb(30, 60, 114);
+    background: linear-gradient(to right, rgb(30, 60, 114), rgb(42, 82, 152));
+    background: -webkit-linear-gradient(to right, rgb(30, 60, 114), rgb(42, 82, 152));
+}
+
+.gradientColorOrange{
+    background: rgb(228, 77, 38);
+    background: linear-gradient(to left, rgb(241, 101, 41), rgb(228, 77, 38));
+    background: -webkit-linear-gradient(to right, rgb(241, 101, 41), rgb(228, 77, 38));
+}
+
+.gradientColorGreen{
+    background: rgb(118, 184, 82);
+    background: linear-gradient(to left, rgb(141, 194, 111), rgb(118, 184, 82));
+    background: -webkit-linear-gradient(to right, rgb(141, 194, 111), rgb(118, 184, 82));
+}
+
+.gradientColorBlue{
+    background: rgb(0, 150, 255);
+    background: linear-gradient(to right, rgb(0, 125, 255), rgb(0, 170, 255));
+    background: -webkit-linear-gradient(to right, rgb(0, 114, 255), rgb(0, 150, 255));
+}
+
+/* Wraps normally, on whitespace */
+p.words{
+    word-wrap: normal;
+}
+
+.centerText{
+    text-align: center;
+} 
+
+p.letters{
+    word-wrap: break-word;
+}
+
+.shadow{
+    box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+    -webkit-box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+}
+
+.articleContainer{
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    margin-top: 2em;
+    margin-bottom: 2em;
+    padding-bottom: 1em;
+    padding-top: 0px;
+    border-radius: .2em;
+    overflow: hidden;
+    width: 80%;
+    max-width: 45em;
+    min-width: 10em;
+}
+
+.articleMetaTag{
+    position: relative;
+    float: left;
+    margin-right: .33em;
+    padding: .25em;
+    background: rgb(235,235,235);
+    border: 1px solid rgba(185,185,185,.5);
+    border-radius: 2px;
+    font-size: .75em;
+}
+
+.articleSubsectionContainer{
+    position: relative;
+    margin: 1em;
+    margin-bottom: 0px;
+    margin-right: 1.33em;
+}
+
+.articleImage{
+    position: relative;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    left: 0px;
+    top: 0px;
+}
+
+.articleImageDescription{
+    position: relative;
+    color: rgb(75,75,75);
+    text-align: center;
+    font-size: .85em;
+}
+
+.articleParagraph{
+    line-height: 1.66em;
+    letter-spacing: 0.01em;
+}
