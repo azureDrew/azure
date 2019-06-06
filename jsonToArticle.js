@@ -10,7 +10,7 @@ document.title = articleJson.title;
 document.getElementById("articleTitle").innerHTML = "<h2>" + articleJson.title + "<h2>";
 document.getElementById("articleCoverImage").innerHTML = '<img class = "articleImage" src="' + articleJson.coverImage.url + '"><div class = "articleImageDescription">' + articleJson.coverImage.description + '</div>';
 
-t = articleJson.timeStamp.split(/[- :]/);
+t = articleJson.time_stamp.split(/[- :]/);
 timeStamp = t[2] + ' ' + t[1] + ' ' + t[0];
 document.getElementById("articleAuthor").innerHTML = 'By ' + articleJson.author + ' - ' + timeStamp;
 
