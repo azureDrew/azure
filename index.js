@@ -32,23 +32,12 @@ module.exports = async function (context, req){
     context.done();
 };
 
-// Connect to DB using credentials from utils.js
-async function dbConnect(){
-    return await sql.connect({
-        user: utils.user,
-        password: utils.password,
-        server: utils.server,
-        database: utils.database,
-        options: {encrypt: true}
-    });
-}
-
 // Get an article from DB by a given id
 async function dbSelectArticleById(id){
     try{
-        // Set up prepared statement query
+        // Connect to DB and set up prepared statement query
         // Select a specific row from article table by id
-        pool = await dbConnect();
+        pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('id', sql.Int, id)
             .query('SELECT id, title, author, metaTags, coverImage, body, time_stamp FROM dbo.article WHERE id = @id');
@@ -67,9 +56,9 @@ async function dbSelectArticleById(id){
 // Insert new article into DB
 async function dbInsertArticle(article){
     try{
-        // Set up prepared statement query
+        // Connect to DB and set up prepared statement query
         // Insert a row into article table
-        pool = await dbConnect();
+        pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(128), article.title)
             .input('author', sql.VarChar(64), article.author)
