@@ -23,7 +23,7 @@ else{
 
 	body = "<br>";
 	articleJson.body.forEach(section => body += typeof section == "string" ? 
-		'<div class = "articleParagraph">' + section + '</div><br>' :
+		'<p class = "articleParagraph">' + section + '</p>' :
 		'<img class = "articleImage" src="' + section.url + '"><div class = "articleImageDescription">' + section.description + '</div><br>'
 	);
 	document.getElementById("articleBody").innerHTML = body;
