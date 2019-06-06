@@ -8,7 +8,7 @@ body{
     font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
     margin: 0px;
     padding: 0px;
-    font-size: 1.2em;
+    font-size: 1.25em;
     position: absolute;
     width: 100%;
     min-height: 100%;
@@ -71,8 +71,8 @@ p.letters{
     border-radius: .2em;
     overflow: hidden;
     width: 80%;
-    max-width: 45em;
-    min-width: 10em;
+    max-width: 38em;
+    min-width: 20em;
 }
 
 .articleMetaTag{
@@ -110,6 +110,7 @@ p.letters{
 }
 
 .articleParagraph{
-    line-height: 1.66em;
+    line-height: 1.5em;
     letter-spacing: 0.01em;
+    font-weight: 400;
 }
