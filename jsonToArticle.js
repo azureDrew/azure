@@ -24,7 +24,7 @@ else{
 	body = "";
 	articleJson.body.forEach(section => body += typeof section == "string" ? 
 		'<p class = "articleParagraph">' + section + '</p>' :
-		'<img class = "articleImage" src="' + section.url + '"><div class = "articleImageDescription">' + section.description + '</div><br>'
+		'<br><img class = "articleImage" src="' + section.url + '"><div class = "articleImageDescription">' + section.description + '</div><br>'
 	);
 	document.getElementById("articleBody").innerHTML = body;
 }
