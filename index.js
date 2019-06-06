@@ -37,7 +37,7 @@ async function dbSelectArticleById(id){
     try{
         // Connect to DB and set up prepared statement query
         // Select a specific row from article table by id
-        pool = await sql.connect(utils.connectionObj);
+        let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('id', sql.Int, id)
             .query('SELECT id, title, author, metaTags, coverImage, body, time_stamp FROM dbo.article WHERE id = @id');
@@ -58,7 +58,7 @@ async function dbInsertArticle(article){
     try{
         // Connect to DB and set up prepared statement query
         // Insert a row into article table
-        pool = await sql.connect(utils.connectionObj);
+        let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(128), article.title)
             .input('author', sql.VarChar(64), article.author)
