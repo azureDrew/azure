@@ -19,7 +19,7 @@ module.exports = async function (context, req){
 
     // If client is posting an article
     else if(req.query.postArticle)
-        body = await dbInsertArticle(req.query.postArticle.trim());
+        body = await dbInsertArticle(JSON.parse(req.query.postArticle).trim());
 
     // If client is lost
     else body = false; // replace with redirect to error.html once made
@@ -36,10 +36,10 @@ module.exports = async function (context, req){
 async function dbSelectArticleById(id){
     try{
         // Connect to DB and set up prepared statement query
-        // Select a specific row from article table by id
+        // Select a specific row from article table by id, then close connection
         let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('id', sql.Int, id)
+            .input('id', sql.Int, utils.escapeHTML(id))
             .query('SELECT id, title, author, metaTags, coverImage, body, time_stamp FROM dbo.article WHERE id = @id');
         pool.close();
         sql.close();
@@ -57,14 +57,14 @@ async function dbSelectArticleById(id){
 async function dbInsertArticle(article){
     try{
         // Connect to DB and set up prepared statement query
-        // Insert a row into article table
+        // Insert a row into article table, then close connection
         let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(128), article.title)
-            .input('author', sql.VarChar(64), article.author)
-            .input('metaTags', sql.VarChar(512), JSON.stringify(article.metaTags))
-            .input('coverImage', sql.VarChar(1024), JSON.stringify(article.coverImage))
-            .input('body', sql.VarChar(8000), JSON.stringify(article.body))
+            .input('title', sql.VarChar(128), utils.escapeHTML(article.title))
+            .input('author', sql.VarChar(64), utils.escapeHTML(article.author))
+            .input('metaTags', sql.VarChar(512), utils.escapeHTML(JSON.stringify(article.metaTags)))
+            .input('coverImage', sql.VarChar(1024), utils.escapeHTML(JSON.stringify(article.coverImage)))
+            .input('body', sql.VarChar(8000), utils.escapeHTML(JSON.stringify(article.body)))
             .query('INSERT INTO dbo.article (title, author, metaTags, coverImage, body) VALUES(@title, @author, @metaTags, @coverImage, @body)');
         pool.close();
         sql.close();
