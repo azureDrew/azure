@@ -22,7 +22,6 @@ module.exports = async function (context, req){
         // If client is posting an article
         else if(req.query.postArticle)
             body = await dbInsertArticle(req.query.postArticle.trim());
-        
     } else status = 404;
 
     context.res = {
@@ -33,20 +32,23 @@ module.exports = async function (context, req){
     context.done();
 };
 
-// Get an article from the DB by a given id
+// Connect to DB using credentials from utils.js
+async function dbConnect(){
+    return await sql.connect({
+        user: utils.user,
+        password: utils.password,
+        server: utils.server,
+        database: utils.database,
+        options: {encrypt: true}
+    });
+}
+
+// Get an article from DB by a given id
 async function dbSelectArticleById(id){
     try{
-        // Connect to DB
-        let pool = await sql.connect({
-            user: utils.user,
-            password: utils.password,
-            server: utils.server,
-            database: utils.database,
-            options: {encrypt: true}
-        });
-        
         // Set up prepared statement query
-        // Select a specific row from the article table by id
+        // Select a specific row from article table by id
+        pool = await dbConnect();
         let result = await pool.request()
             .input('id', sql.Int, id)
             .query('SELECT id, title, author, metaTags, coverImage, body, time_stamp FROM dbo.article WHERE id = @id');
@@ -65,17 +67,9 @@ async function dbSelectArticleById(id){
 // Insert new article into DB
 async function dbInsertArticle(article){
     try{
-        // Connect to DB
-        let pool = await sql.connect({
-            user: utils.user,
-            password: utils.password,
-            server: utils.server,
-            database: utils.database,
-            options: {encrypt: true}
-        });
-
         // Set up prepared statement query
-        // Insert a row into the article table
+        // Insert a row into article table
+        pool = await dbConnect();
         let result = await pool.request()
             .input('title', sql.VarChar(128), article.title)
             .input('author', sql.VarChar(64), article.author)
