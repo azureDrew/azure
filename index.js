@@ -4,47 +4,33 @@ let sql = require('mssql');
 let utils = require('./utils');
 
 module.exports = async function (context, req){
+    let body = "";
+    let status = 200;
 
-    // Expected input: int
-    if(req.query.article){
-        // Get article by id from DB
-        let articleJson = await dbSelectArticleById(req.query.article.trim());
-
-        // If article SELECT caused error, return error message
-        // Else, render article page with json obtained from SELECT
-        context.res = {
-            status: 200,
-            body: ejs.render( 
+    if(req.query.article || req.query.getArticle || req.query.postArticle){
+        // If client is requesting a webpage with article
+        if(req.query.article) 
+            body = ejs.render( 
                 fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
-                {articleJson: articleJson}
-            ),
-            headers: {'Content-Type': 'text/html'}
-        };
-        context.done();
+                {articleJson: await dbSelectArticleById(req.query.article.trim())}
+            );
 
-    // Expected input: int
-    } else if(req.query.getArticle){
+        // If client is requesting an article
+        else if(req.query.getArticle)
+            body = await dbSelectArticleById(req.query.getArticle.trim());
 
-        // Get article by id from DB and return it to client
-        let articleJson = await dbSelectArticleById(req.query.getArticle.trim());
-        context.res = {
-            status: 200,
-            body: articleJson,
-            headers: {'Content-Type': 'text/html'}
-        };
-        context.done();
+        // If client is posting an article
+        else if(req.query.postArticle)
+            body = await dbInsertArticle(req.query.postArticle.trim());
+        
+    } else status = 404;
 
-    // Expected input: json article obj
-    } else if(req.query.postArticle){
-        // Insert new article into DB
-        let insertArticle = await dbInsertArticle(req.query.postArticle.trim());
-        context.res = {
-            status: 200,
-            body: insertArticle,
-            headers: {'Content-Type': 'text/html'}
-        };
-        context.done();
-    }
+    context.res = {
+        status: status,
+        body: body,
+        headers: {'Content-Type': 'text/html'}
+    };
+    context.done();
 };
 
 // Get an article from the DB by a given id
