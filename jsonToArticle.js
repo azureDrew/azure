@@ -1,3 +1,11 @@
+
+document.getElementById("articleContainer").innerHTML = '' +
+	'<div class = "articleSubsectionContainer centerText" id = "articleTitle"></div>' +
+	'<div class = "articleSubsectionContainer centerText" id = "articleAuthor"></div>' +
+	'<div class = "articleSubsectionContainer" id = "articleCoverImage"></div>' +
+	'<div class = "articleSubsectionContainer" id = "articleMetaTags"></div>' +
+	'<div class = "articleSubsectionContainer" id = "articleBody"></div>';
+
 document.title = articleJson.title;
 document.getElementById("articleTitle").innerHTML = "<h2>" + articleJson.title + "<h2>";
 document.getElementById("articleCoverImage").innerHTML = '<img class = "articleImage" src="' + articleJson.coverImage.url + '"><div class = "articleImageDescription">' + articleJson.coverImage.description + '</div>';
