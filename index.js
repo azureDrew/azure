@@ -14,7 +14,7 @@ module.exports = async function (context, req){
         // Else, render article page with json obtained from SELECT
         context.res = {
             status: 200,
-            body: articleJson == false ? "Article DNE" : ejs.render( 
+            body: ejs.render( 
                 fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
                 {articleJson: articleJson}
             ),
@@ -29,7 +29,7 @@ module.exports = async function (context, req){
         let articleJson = await dbSelectArticleById(req.query.getArticle.trim());
         context.res = {
             status: 200,
-            body: articleJson == false ? "Article DNE" : articleJson,
+            body: articleJson,
             headers: {'Content-Type': 'text/html'}
         };
         context.done();
@@ -37,10 +37,10 @@ module.exports = async function (context, req){
     // Expected input: json article obj
     } else if(req.query.postArticle){
         // Insert new article into DB
-        insertArticle = await dbInsertArticle(req.query.postArticle.trim());
+        let insertArticle = await dbInsertArticle(req.query.postArticle.trim());
         context.res = {
             status: 200,
-            body: articleJson == false ? "Article DNE" : articleJson,
+            body: insertArticle,
             headers: {'Content-Type': 'text/html'}
         };
         context.done();
