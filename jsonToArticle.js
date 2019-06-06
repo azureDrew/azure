@@ -17,14 +17,14 @@ else{
 
 	metaTags = "";
 	articleJson.metaTags.forEach(tag => 
-	    metaTags += '<div class = "articleMetaTag">' + tag + '</div>'
+		metaTags += '<div class = "articleMetaTag">' + tag + '</div>'
 	);
 	document.getElementById("articleMetaTags").innerHTML = metaTags + "<br>";
 
 	body = "<br>";
 	articleJson.body.forEach(section => body += typeof section == "string" ? 
-	    '<div class = "articleParagraph">' + section + '</div><br>' :
-	    '<img class = "articleImage" src="' + section.url + '"><div class = "articleImageDescription">' + section.description + '</div><br>'
+		'<div class = "articleParagraph">' + section + '</div><br>' :
+		'<img class = "articleImage" src="' + section.url + '"><div class = "articleImageDescription">' + section.description + '</div><br>'
 	);
 	document.getElementById("articleBody").innerHTML = body;
 }
