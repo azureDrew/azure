@@ -5,27 +5,27 @@ let utils = require('./utils');
 
 module.exports = async function (context, req){
     let body = "";
-    let status = 200;
 
-    if(req.query.article || req.query.getArticle || req.query.postArticle){
-        // If client is requesting a webpage with article
-        if(req.query.article) 
-            body = ejs.render( 
-                fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
-                {articleJson: await dbSelectArticleById(req.query.article.trim())}
-            );
+    // If client is requesting a webpage with article
+    if(req.query.article) 
+        body = ejs.render( 
+            fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
+            {articleJson: await dbSelectArticleById(req.query.article.trim())}
+        );
 
-        // If client is requesting an article
-        else if(req.query.getArticle)
-            body = await dbSelectArticleById(req.query.getArticle.trim());
+    // If client is requesting an article
+    else if(req.query.getArticle)
+        body = await dbSelectArticleById(req.query.getArticle.trim());
 
-        // If client is posting an article
-        else if(req.query.postArticle)
-            body = await dbInsertArticle(req.query.postArticle.trim());
-    } else status = 404;
+    // If client is posting an article
+    else if(req.query.postArticle)
+        body = await dbInsertArticle(req.query.postArticle.trim());
+
+    // If client is lost
+    else body = false; // replace with redirect to error.html once made
 
     context.res = {
-        status: status,
+        status: 200,
         body: body,
         headers: {'Content-Type': 'text/html'}
     };
