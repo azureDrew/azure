@@ -1,9 +1,12 @@
 let fs = require('fs');
 let ejs = require('ejs');
 let sql = require('mssql');
+let utils = require('./utils');
 
 module.exports = async function (context, req){
-    if (req.query.article){
+
+    // Expected input: int
+    if(req.query.article){
         // Get article by id from DB
         let articleJson = await dbSelectArticleById(req.query.article.trim());
 
@@ -18,18 +21,41 @@ module.exports = async function (context, req){
             headers: {'Content-Type': 'text/html'}
         };
         context.done();
+
+    // Expected input: int
+    } else if(req.query.getArticle){
+
+        // Get article by id from DB and return it to client
+        let articleJson = await dbSelectArticleById(req.query.getArticle.trim());
+        context.res = {
+            status: 200,
+            body: articleJson == false ? "Article DNE" : articleJson,
+            headers: {'Content-Type': 'text/html'}
+        };
+        context.done();
+
+    // Expected input: json article obj
+    } else if(req.query.postArticle){
+        // Insert new article into DB
+        insertArticle = await dbInsertArticle(req.query.postArticle.trim());
+        context.res = {
+            status: 200,
+            body: articleJson == false ? "Article DNE" : articleJson,
+            headers: {'Content-Type': 'text/html'}
+        };
+        context.done();
     }
 };
 
-// Get an article from the DB by a given id.
+// Get an article from the DB by a given id
 async function dbSelectArticleById(id){
     try{
         // Connect to DB
         let pool = await sql.connect({
-            user: '',
-            password: '',
-            server: '',
-            database: '',
+            user: utils.user,
+            password: utils.password,
+            server: utils.server,
+            database: utils.database,
             options: {encrypt: true}
         });
         
@@ -55,10 +81,10 @@ async function dbInsertArticle(article){
     try{
         // Connect to DB
         let pool = await sql.connect({
-            user: '',
-            password: '',
-            server: '',
-            database: '',
+            user: utils.user,
+            password: utils.password,
+            server: utils.server,
+            database: utils.database,
             options: {encrypt: true}
         });
 
