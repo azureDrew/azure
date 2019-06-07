@@ -22,7 +22,7 @@ module.exports = async function (context, req){
         body = await dbInsertArticle(JSON.parse(req.query.postArticle).trim());
 
     // If client is lost
-    else body = false; // replace with redirect to error.html once made
+    else body = false; // Replace with redirect to error.html once made
 
     context.res = {
         status: 200,
@@ -40,7 +40,10 @@ async function dbSelectArticleById(id){
         let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('id', sql.Int, utils.escapeHTML(id))
-            .query('SELECT id, title, author, metaTags, coverImage, body, time_stamp FROM dbo.article WHERE id = @id');
+            .query(
+                'SELECT id, title, author, metaTags, coverImage, body, time_stamp \
+                FROM dbo.article WHERE id = @id'
+            );
         pool.close();
         sql.close();
 
@@ -65,7 +68,10 @@ async function dbInsertArticle(article){
             .input('metaTags', sql.VarChar(512), utils.escapeHTML(JSON.stringify(article.metaTags)))
             .input('coverImage', sql.VarChar(1024), utils.escapeHTML(JSON.stringify(article.coverImage)))
             .input('body', sql.VarChar(8000), utils.escapeHTML(JSON.stringify(article.body)))
-            .query('INSERT INTO dbo.article (title, author, metaTags, coverImage, body) VALUES(@title, @author, @metaTags, @coverImage, @body)');
+            .query(
+                'INSERT INTO dbo.article (title, author, metaTags, coverImage, body) \
+                VALUES(@title, @author, @metaTags, @coverImage, @body)'
+            );
         pool.close();
         sql.close();
 
