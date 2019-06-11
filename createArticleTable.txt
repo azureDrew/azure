@@ -1,9 +1,0 @@
-CREATE TABLE article (
-    id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
-    title VARCHAR(128) NOT NULL,
-    author VARCHAR(64) NOT NULL,
-    metaTags VARCHAR(512) NOT NULL,
-    coverImage VARCHAR(1024) NOT NULL,
-    body VARCHAR(8000) NOT NULL,
-    time_stamp DATETIME DEFAULT GETDATE()
-);

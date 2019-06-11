@@ -1,0 +1,16 @@
+CREATE TABLE article (
+    title VARCHAR(128) NOT NULL PRIMARY KEY,
+    author VARCHAR(64) NOT NULL,
+    metaTags VARCHAR(512) NOT NULL,
+    coverImage VARCHAR(1024) NOT NULL,
+    body VARCHAR(8000) NOT NULL,
+    time_stamp DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE articleTag (
+    id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+    articleTitle VARCHAR(128) NOT NULL FOREIGN KEY REFERENCES article(title),
+    tag VARCHAR(24) NOT NULL,
+    hiddenFlag INT DEFAULT 0,
+    time_stamp DATETIME DEFAULT GETDATE()
+);
