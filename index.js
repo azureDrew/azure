@@ -83,8 +83,9 @@ async function dbInsertArticle(article){
                     .input('tag' + a, sql.VarChar(24), utils.escapeHTML(article.metaTags[a]));
             }
         }
+        
+        // Execute query, close connections, return outcome
         result = await result.query(batchInput);
-
         pool.close();
         sql.close();
         return result.rowsAffected > 0 ? true : false;
