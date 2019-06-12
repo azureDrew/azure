@@ -60,27 +60,34 @@ async function dbSelectArticle(title){
 // Insert new article into DB
 // Insert all associated articleTags into DB
 async function dbInsertArticle(article){
+    let maxTitleLen = 128;
+    let maxAuthorLen = 64;
+    let maxImageLen = 1024;
+    let maxBodyLen = 8000;
+    let maxTagLen = 24;
+    let maxNumOfTags = 5;
+
     try{
         // Connect to DB and set up prepared statement query
         // Insert row into article DB table for new article
         let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(128), utils.escapeHTML(article.title))
-            .input('author', sql.VarChar(64), utils.escapeHTML(article.author))
-            .input('coverImage', sql.VarChar(1024), utils.escapeHTML(JSON.stringify(article.coverImage)))
-            .input('body', sql.VarChar(8000), utils.escapeHTML(JSON.stringify(article.body)));
+            .input('title', sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
+            .input('author', sql.VarChar(maxAuthorLen), utils.escapeHTML(article.author))
+            .input('coverImage', sql.VarChar(maxImageLen), utils.escapeHTML(JSON.stringify(article.coverImage)))
+            .input('body', sql.VarChar(maxBodyLen), utils.escapeHTML(JSON.stringify(article.body)));
         let batchInput = 'INSERT INTO dbo.article (title, author, coverImage, body) \
             VALUES(@title, @author, @coverImage, @body) ';
 
         // For each articleTag, insert row into articleTag table
-        // Only insert first 5 tags and only if they are less than 24 chars
-        for(a = 0; a < article.metaTags.length && a < 5; a++){
-            if(article.metaTags[a].length <= 24){
+        // Only insert first maxNumOfTags tags and only if they are <= maxTagLen chars
+        for(a = 0; a < article.metaTags.length && a < maxNumOfTags; a++){
+            if(article.metaTags[a].length <= maxTagLen){
                 batchInput += ' INSERT INTO dbo.articleTag (articleTitle, tag) \
                     VALUES(@articleTitle' + a + ', @tag' + a + '); ';
                 result = result
-                    .input('articleTitle' + a, sql.VarChar(128), utils.escapeHTML(article.title))
-                    .input('tag' + a, sql.VarChar(24), utils.escapeHTML(article.metaTags[a]));
+                    .input('articleTitle' + a, sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
+                    .input('tag' + a, sql.VarChar(maxTagLen), utils.escapeHTML(article.metaTags[a]));
             }
         }
         
