@@ -4,7 +4,7 @@ else{
 		'<div class = "articleSubsectionContainer centerText" id = "articleTitle"></div>' +
 		'<div class = "articleSubsectionContainer centerText" id = "articleAuthor"></div>' +
 		'<div class = "articleSubsectionContainer" id = "articleCoverImage"></div>' +
-		'<div class = "articleSubsectionContainer" id = "articleMetaTags"></div>' +
+		'<div class = "articleSubsectionContainer" id = "articleTags"></div>' +
 		'<div class = "articleSubsectionContainer" id = "articleBody"></div>';
 
 	document.title = articleJson.title;
@@ -15,11 +15,11 @@ else{
 	timeStamp = t[2] + ' ' + t[1] + ' ' + t[0];
 	document.getElementById("articleAuthor").innerHTML = 'By ' + articleJson.author + ' - ' + timeStamp;
 
-	metaTags = "";
-	articleJson.metaTags.forEach(tag => 
-		metaTags += '<div class = "articleMetaTag">' + tag.tag + '</div>'
+	articleTags = "";
+	articleJson.tags.forEach(tag => 
+		articleTags += '<div class = "articleTag">' + tag.tag + '</div>'
 	);
-	document.getElementById("articleMetaTags").innerHTML = metaTags + "<br>";
+	document.getElementById("articleTags").innerHTML = articleTags + "<br>";
 
 	body = "";
 	articleJson.body.forEach(section => body += typeof section == "string" ? 
