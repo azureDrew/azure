@@ -26,5 +26,5 @@ else{
 		'<p class = "articleParagraph">' + section + '</p>' :
 		'<br><img class = "articleImage" src="' + section.url + '"><div class = "articleImageDescription">' + section.description + '</div><br>'
 	);
-	document.getElementById("articleBody").innerHTML = body;
+	document.getElementById("articleBody").innerHTML = markup(body);
 }
