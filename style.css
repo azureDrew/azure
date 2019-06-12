@@ -75,7 +75,7 @@ p.letters{
     min-width: 20em;
 }
 
-.articleMetaTag{
+.articleTag{
     position: relative;
     float: left;
     margin-right: .33em;
