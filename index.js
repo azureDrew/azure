@@ -6,18 +6,18 @@ let utils = require('./utils');
 module.exports = async function (context, req){
     let body = "";
     
-    // If client is requesting a webpage with article
+    // If client is requesting webpage with article
     if(req.query.article) 
         body = ejs.render( 
             fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
             {articleJson: await dbSelectArticle(req.query.article.trim())}
         );
 
-    // If client is requesting an article
+    // If client is requesting article
     else if(req.query.getArticle)
         body = await dbSelectArticle(req.query.getArticle.trim());
 
-    // If client is posting an article
+    // If client is posting article
     else if(req.query.postArticle)
         body = await dbInsertArticle(JSON.parse(req.query.postArticle).trim());
 
@@ -32,11 +32,11 @@ module.exports = async function (context, req){
     context.done();
 };
 
-// Get an article from DB by a given id
+// Get article from DB by given title
 async function dbSelectArticle(title){
     try{
         // Connect to DB and set up prepared statement query
-        // Select a specific row from article table by id, then close connection
+        // Select row from article table by title and all tags associated with article
         let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(128), utils.escapeHTML(title))
@@ -48,7 +48,7 @@ async function dbSelectArticle(title){
         pool.close();
         sql.close();
 
-        // Clean up / format DB result for JSON output and return result
+        // Clean up / format DB result to make coherent object and return result
         let article = result.recordsets[0][0];
         article.body = JSON.parse(article.body);
         article.metaTags = result.recordsets[1];
