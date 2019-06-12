@@ -17,7 +17,7 @@ else{
 
 	metaTags = "";
 	articleJson.metaTags.forEach(tag => 
-		metaTags += '<div class = "articleMetaTag">' + tag + '</div>'
+		metaTags += '<div class = "articleMetaTag">' + tag.tag + '</div>'
 	);
 	document.getElementById("articleMetaTags").innerHTML = metaTags + "<br>";
 
