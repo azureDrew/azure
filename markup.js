@@ -11,14 +11,14 @@ function markup(str){
 
 	// For each markdown element, convert their occurences in str into corresponding HTML tag
 	elems.forEach(elem => {
-		elemCount = (str.match(elem[0], 'g') || []).length;
+		elemCount = str.split(elem[0]).length - 1;
 
 		// Append closing tag to str if count of markdown elements is uneven
 		if(elemCount % 2 != 0) str += elem[2];
 
 		// For a given elem, every other conversion in str should be opening/closing tag
 		for(a = 0; a < elemCount; a++)
-			str = a++ % 2 == 0 ? str.replace(elem[0], elem[1]) : str.replace(elem[0], elem[2]);
+			str = a % 2 == 0 ? str.replace(elem[0], elem[1]) : str.replace(elem[0], elem[2]);
 	});
 	return str;
 }
