@@ -51,9 +51,9 @@ async function dbSelectArticle(title){
         // Clean up / format DB result to make coherent object and return result
         let article = result.recordsets[0][0];
         article.body = JSON.parse(article.body);
-        article.metaTags = result.recordsets[1];
+        article.tags = result.recordsets[1];
         article.coverImage = JSON.parse(article.coverImage);
-        return utils.escapeHTML(JSON.stringify(article));
+        return JSON.stringify(article);
     } catch(e){return false;}
 }
 
@@ -68,26 +68,36 @@ async function dbInsertArticle(article){
     let maxNumOfTags = 5;
 
     try{
+        // Escape sections of article and convert markdown characters to HTML tags
+        // Elements of body must be either paragraphs of text or objects representing images
+        article.coverImage.url = utils.escapeHTML(article.coverImage.url);
+        article.coverImage.description = utils.markupHTML(article.coverImage.description);
+        article.body.forEach((elem, i) => article.body[i] = typeof elem == "string" ?
+            utils.markupHTML(elem) :
+            {url: utils.escapeHTML(elem.url),
+            description: utils.markupHTML(elem.description)}
+        );
+
         // Connect to DB and set up prepared statement query
         // Insert row into article DB table for new article
         let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
             .input('author', sql.VarChar(maxAuthorLen), utils.escapeHTML(article.author))
-            .input('coverImage', sql.VarChar(maxImageLen), utils.escapeHTML(JSON.stringify(article.coverImage)))
-            .input('body', sql.VarChar(maxBodyLen), utils.escapeHTML(JSON.stringify(article.body)));
+            .input('coverImage', sql.VarChar(maxImageLen), JSON.stringify(article.coverImage))
+            .input('body', sql.VarChar(maxBodyLen), JSON.stringify(article.body));
         let batchInput = 'INSERT INTO dbo.article (title, author, coverImage, body) \
             VALUES(@title, @author, @coverImage, @body) ';
-
+        
         // For each articleTag, insert row into articleTag table
-        // Only insert first maxNumOfTags tags and only if they are <= maxTagLen chars
-        for(a = 0; a < article.metaTags.length && a < maxNumOfTags; a++){
-            if(article.metaTags[a].length <= maxTagLen){
+        // Only insert first maxNumOfTags tags and only if they do not excede maxTagLen chars
+        for(a = 0; a < article.tags.length && a < maxNumOfTags; a++){ 
+            if(article.tags[a].length <= maxTagLen){
                 batchInput += ' INSERT INTO dbo.articleTag (articleTitle, tag) \
                     VALUES(@articleTitle' + a + ', @tag' + a + '); ';
                 result = result
                     .input('articleTitle' + a, sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
-                    .input('tag' + a, sql.VarChar(maxTagLen), utils.escapeHTML(article.metaTags[a]));
+                    .input('tag' + a, sql.VarChar(maxTagLen), utils.escapeHTML(article.tags[a]));
             }
         }
         
@@ -96,5 +106,5 @@ async function dbInsertArticle(article){
         pool.close();
         sql.close();
         return result.rowsAffected > 0 ? true : false;
-    } catch(e){return false;}
+    } catch(e){return e;}
 }
