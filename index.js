@@ -33,6 +33,7 @@ module.exports = async function (context, req){
 };
 
 // Get article from DB by given title
+// input: string
 async function dbSelectArticle(title){
     try{
         // Connect to DB and set up prepared statement query
@@ -59,6 +60,13 @@ async function dbSelectArticle(title){
 
 // Insert new article into DB
 // Insert all associated articleTags into DB
+// input: {
+//    title: string,
+//    author: string,
+//    tags: [string, ...],
+//    coverImage: {url: string, description: string},
+//    body: [string, {url: string, description: string}, ...]
+// }
 async function dbInsertArticle(article){
     let maxTitleLen = 128;
     let maxAuthorLen = 64;
@@ -69,13 +77,12 @@ async function dbInsertArticle(article){
 
     try{
         // Escape sections of article and convert markdown characters to HTML tags
-        // Elements of body must be either paragraphs of text or objects representing images
+        // Elements of body must be either strings or image objects representing images
         article.coverImage.url = utils.escapeHTML(article.coverImage.url);
         article.coverImage.description = utils.markupHTML(article.coverImage.description);
         article.body.forEach((elem, i) => article.body[i] = typeof elem == "string" ?
             utils.markupHTML(elem) :
-            {url: utils.escapeHTML(elem.url),
-            description: utils.markupHTML(elem.description)}
+            {url: utils.escapeHTML(elem.url), description: utils.markupHTML(elem.description)}
         );
 
         // Connect to DB and set up prepared statement query
@@ -106,5 +113,5 @@ async function dbInsertArticle(article){
         pool.close();
         sql.close();
         return result.rowsAffected > 0 ? true : false;
-    } catch(e){return e;}
+    } catch(e){return false;}
 }
