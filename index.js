@@ -2,6 +2,7 @@ let fs = require('fs');
 let ejs = require('ejs');
 let sql = require('mssql');
 let utils = require('./utils');
+let pool;
 
 module.exports = async function (context, req){
     let body = "";
@@ -36,9 +37,9 @@ module.exports = async function (context, req){
 // input: string
 async function dbSelectArticle(title){
     try{
-        // Connect to DB and set up prepared statement query
+        // Connect to DB with pool (if DNE) and set up prepared statement query
         // Select row from article table by title and all tags associated with article
-        let pool = await sql.connect(utils.connectionObj);
+        pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(128), utils.escapeHTML(title).trim())
             .query(
@@ -46,8 +47,6 @@ async function dbSelectArticle(title){
                 FROM dbo.article WHERE title = @title; \
                 SELECT tag FROM articleTag WHERE articleTitle = @title;'
             );
-        pool.close();
-        sql.close();
 
         // Clean up / format DB result to make coherent object and return result
         let article = result.recordsets[0][0];
@@ -85,9 +84,9 @@ async function dbInsertArticle(article){
             {url: utils.escapeHTML(elem.url), description: utils.markupHTML(elem.description)}
         );
         
-        // Connect to DB and set up prepared statement query
+        // Connect to DB with pool (if DNE) and set up prepared statement query
         // Insert row into article DB table for new article
-        let pool = await sql.connect(utils.connectionObj);
+        pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
             .input('author', sql.VarChar(maxAuthorLen), utils.escapeHTML(article.author))
@@ -108,10 +107,7 @@ async function dbInsertArticle(article){
         }
         batchInput += ' END ';
         
-        // Execute query, close connections, return outcome
-        result = await result.query(batchInput);
-        pool.close();
-        sql.close();
-        return result.rowsAffected[0] == 1 ? true : false;
+        // Execute query and return outcome
+        return (await result.query(batchInput)).rowsAffected[0] == 1 ? true : false;
     } catch(e){return false;}
 }
