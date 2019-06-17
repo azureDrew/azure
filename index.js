@@ -10,12 +10,12 @@ module.exports = async function (context, req){
     if(req.query.article) 
         body = ejs.render( 
             fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
-            {articleJson: await dbSelectArticle(req.query.article.trim())}
+            {articleJson: await dbSelectArticle(req.query.article)}
         );
 
     // If client is requesting article
     else if(req.query.getArticle)
-        body = await dbSelectArticle(req.query.getArticle.trim());
+        body = await dbSelectArticle(req.query.getArticle);
 
     // If client is posting article
     else if(req.query.postArticle)
@@ -40,7 +40,7 @@ async function dbSelectArticle(title){
         // Select row from article table by title and all tags associated with article
         let pool = await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(128), utils.escapeHTML(title))
+            .input('title', sql.VarChar(128), utils.escapeHTML(title).trim())
             .query(
                 'SELECT title, author, coverImage, body, time_stamp \
                 FROM dbo.article WHERE title = @title; \
@@ -84,7 +84,7 @@ async function dbInsertArticle(article){
             utils.markupHTML(elem) :
             {url: utils.escapeHTML(elem.url), description: utils.markupHTML(elem.description)}
         );
-
+        
         // Connect to DB and set up prepared statement query
         // Insert row into article DB table for new article
         let pool = await sql.connect(utils.connectionObj);
@@ -97,21 +97,21 @@ async function dbInsertArticle(article){
             VALUES(@title, @author, @coverImage, @body) ';
         
         // For each articleTag, insert row into articleTag table
-        // Only insert first maxNumOfTags tags and only if they do not excede maxTagLen chars
-        for(a = 0; a < article.tags.length && a < maxNumOfTags; a++){ 
-            if(article.tags[a].length <= maxTagLen){
-                batchInput += ' INSERT INTO dbo.articleTag (articleTitle, tag) \
-                    VALUES(@articleTitle' + a + ', @tag' + a + '); ';
-                result = result
-                    .input('articleTitle' + a, sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
-                    .input('tag' + a, sql.VarChar(maxTagLen), utils.escapeHTML(article.tags[a]));
-            }
+        // Only insert first maxNumOfTags tags and only if article insert was successful
+        batchInput += ' IF @@ROWCOUNT = 1 BEGIN ';
+        for(a = 0; (a < article.tags.length) && (a < maxNumOfTags); a++){ 
+            batchInput += ' INSERT INTO dbo.articleTag (articleTitle, tag) \
+                VALUES(@articleTitle' + a + ', @tag' + a + '); ';
+            result = result
+                .input('articleTitle' + a, sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
+                .input('tag' + a, sql.VarChar(maxTagLen), utils.escapeHTML(article.tags[a]));
         }
+        batchInput += ' END ';
         
         // Execute query, close connections, return outcome
         result = await result.query(batchInput);
         pool.close();
         sql.close();
-        return result.rowsAffected > 0 ? true : false;
+        return result.rowsAffected[0] == 1 ? true : false;
     } catch(e){return false;}
 }
