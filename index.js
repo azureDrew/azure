@@ -12,8 +12,8 @@ module.exports = async function (context, req){
     if(req.article) 
         body = ejs.render(
             fs.readFileSync(__dirname + "/article.ejs", 'utf-8'), {
-                articleJson: await dbSelectArticle(req.article, req.previousArticleViewedId),
-                articleRecJson: await dbSelectArticleRecomendations(req.article)
+                article: await dbSelectArticle(req.article, req.previousArticleViewedId),
+                articleRecommendations: await dbSelectArticleRecommendations(req.article)
             }
         );
 
@@ -66,8 +66,8 @@ async function dbSelectArticle(title, previousArticleViewedId){
     } catch(e){return false;}
 }
 
-// Dumby function for testing front end recomendations system
-async function dbSelectArticleRecomendations(title){
+// Dumby function for testing front end recommendations system
+async function dbSelectArticleRecommendations(title){
     return JSON.stringify([
         {title: "hey", coverImage: {
             url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
