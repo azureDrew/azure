@@ -8,12 +8,12 @@
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/escapeAndMarkupHTML.js"></script>
     </head>
     <body>
-        <!-- Parse json, format, and display article -->
+        <!-- Format and display article -->
         <div class = "articleContainer" id = "articleContainer"></div>
-        <script> articleJson = <%- article %>; </script>
+        <script> article = <%- article %>; </script>
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/jsonToArticle.js"></script>
     
-        <!-- Parse json, format, and display article recomendations-->
+        <!-- Format and display article recomendations-->
         <div class = "articleContainer" id = "articleRecsContainer"></div>
         <script> articleRecommendations = <%- articleRecommendations %>; </script>
         <script>
