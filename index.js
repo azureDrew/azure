@@ -11,12 +11,18 @@ module.exports = async function (context, req){
     if(req.query.article) 
         body = ejs.render( 
             fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
-            {articleJson: await dbSelectArticle(req.query.article)}
+            {articleJson: await dbSelectArticle({
+                title: req.query.article, 
+                previousArticleViewedId: req.query.previousArticleViewedId
+            })}
         );
 
     // If client is requesting article
     else if(req.query.getArticle)
-        body = await dbSelectArticle(req.query.getArticle);
+        body = await dbSelectArticle({
+            title: req.query.article, 
+            previousArticleViewedId: req.query.previousArticleViewedId
+        });
 
     // If client is posting article
     else if(req.query.postArticle)
@@ -34,25 +40,31 @@ module.exports = async function (context, req){
 };
 
 // Get article from DB by given title
-// input: string
-async function dbSelectArticle(title){
+// input: {title: string, previousArticle: string}
+async function dbSelectArticle(request){
     try{
         // Connect to DB with pool (if DNE) and set up prepared statement query
-        // Select row from article table by title and all tags associated with article
+        // Select row from article table by title and all tags associated with it
+        // Insert row into articleView table to log traffic, then output id for row
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(128), title)
+            .input('title', sql.VarChar(128), request.title)
+            .input('previousArticleViewedId', sql.Int, request.previousArticleViewedId)
             .query(
                 'SELECT title, author, coverImage, body, time_stamp \
-                FROM dbo.article WHERE title = @title; \
-                SELECT tag FROM articleTag WHERE articleTitle = @title;'
+                    FROM dbo.article WHERE title = @title; \
+                SELECT tag FROM articleTag WHERE articleTitle = @title; \
+                INSERT into dbo.articleView (articleTitle, previousArticleViewedId) \
+                    VALUES(@title, @previousArticleViewedId) \
+                SELECT SCOPE_IDENTITY();'
             );
 
-        // Clean up / format DB result to make coherent object and return result
+        // Clean up / format DB result to make coherent object, then return result
         let article = result.recordsets[0][0];
         article.body = JSON.parse(article.body);
         article.tags = result.recordsets[1];
         article.coverImage = JSON.parse(article.coverImage);
+        article.articleChainViewedHead = Object.values(result.recordsets[2][0])[0];
         return JSON.stringify(article);
     } catch(e){return false;}
 }
@@ -89,7 +101,7 @@ async function dbInsertArticle(article){
         // For each articleTag, insert row into articleTag table
         // Only insert first maxNumOfTags tags and only if article insert was successful
         batchInput += ' IF @@ROWCOUNT = 1 BEGIN ';
-        for(a = 0; (a < article.tags.length) && (a < maxNumOfTags); a++){ 
+        for(a = 0; a < article.tags.length && a < maxNumOfTags; a++){ 
             batchInput += ' INSERT INTO dbo.articleTag (articleTitle, tag) \
                 VALUES(@articleTitle' + a + ', @tag' + a + '); ';
             result = result
