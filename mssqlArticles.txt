@@ -13,3 +13,10 @@ CREATE TABLE articleTag (
     hiddenFlag INT DEFAULT 0,
     time_stamp DATETIME DEFAULT GETDATE()
 );
+
+CREATE TABLE articleView (
+    id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+    articleTitle VARCHAR(128) NOT NULL FOREIGN KEY REFERENCES article(title),
+    previousArticleViewedId INT DEFAULT NULL,
+    time_stamp DATETIME DEFAULT GETDATE()
+);
