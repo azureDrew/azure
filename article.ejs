@@ -8,8 +8,20 @@
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/escapeAndMarkupHTML.js"></script>
     </head>
     <body>
+        <!-- Parse json, format, and display article -->
         <div class = "articleContainer" id = "articleContainer"></div>
         <script> articleJson = <%- articleJson %>; </script>
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/jsonToArticle.js"></script>
+    
+        <!-- Parse json, format, and display article recomendations-->
+        <div class = "articleContainer" id = "articleRecsContainer"></div>
+        <script> articleRecJson = <%- articleRecJson %>; </script>
+        <script>
+            // Need to build out css for this...
+            articleRecJson.forEach(rec => {
+                document.getElementById("articleRecsContainer").innerHTML += rec.title + '<br>';
+                document.getElementById("articleRecsContainer").innerHTML += '<img class = "articleImage" src="' + escapeHTML(rec.coverImage.url) + '">';
+            });
+        </script>
     </body>
 </html>
