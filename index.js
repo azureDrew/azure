@@ -6,27 +6,22 @@ let pool;
 
 module.exports = async function (context, req){
     let body = "";
+    req = req.query;
     
     // If client is requesting webpage with article
-    if(req.query.article) 
-        body = ejs.render( 
-            fs.readFileSync(__dirname + "/article.ejs", 'utf-8'),
-            {articleJson: await dbSelectArticle({
-                title: req.query.article, 
-                previousArticleViewedId: req.query.previousArticleViewedId
-            })}
+    if(req.article) 
+        body = ejs.render(
+            fs.readFileSync(__dirname + "/article.ejs", 'utf-8'), 
+            {articleJson: await dbSelectArticle(req.article, req.previousArticleViewedId)}
         );
 
     // If client is requesting article
-    else if(req.query.getArticle)
-        body = await dbSelectArticle({
-            title: req.query.article, 
-            previousArticleViewedId: req.query.previousArticleViewedId
-        });
+    else if(req.getArticle)
+        body = await dbSelectArticle(req.getArticle, req.previousArticleViewedId);
 
     // If client is posting article
-    else if(req.query.postArticle)
-        body = await dbInsertArticle(JSON.parse(req.query.postArticle));
+    else if(req.postArticle)
+        body = await dbInsertArticle(JSON.parse(req.postArticle));
 
     // If client is lost
     else body = false; // Replace with redirect to error.html once made
@@ -40,16 +35,16 @@ module.exports = async function (context, req){
 };
 
 // Get article from DB by given title
-// input: {title: string, previousArticle: string}
-async function dbSelectArticle(request){
+// input: string, string
+async function dbSelectArticle(title, previousArticleViewedId){
     try{
         // Connect to DB with pool (if DNE) and set up prepared statement query
         // Select row from article table by title and all tags associated with it
         // Insert row into articleView table to log traffic, then output id for row
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(128), request.title)
-            .input('previousArticleViewedId', sql.Int, request.previousArticleViewedId)
+            .input('title', sql.VarChar(128), title)
+            .input('previousArticleViewedId', sql.Int, previousArticleViewedId)
             .query(
                 'SELECT title, author, coverImage, body, time_stamp \
                     FROM dbo.article WHERE title = @title; \
