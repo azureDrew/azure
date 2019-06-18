@@ -1,6 +1,6 @@
 module.exports = {
 	// DB connectivity stuffs
-    connectionObj: {
+	connectionObj: {
 		user: 'azure-user-name',
 		database: 'azure-database-name',
 		password: 'azure-database-password',
