@@ -11,8 +11,10 @@ module.exports = async function (context, req){
     // If client is requesting webpage with article
     if(req.article) 
         body = ejs.render(
-            fs.readFileSync(__dirname + "/article.ejs", 'utf-8'), 
-            {articleJson: await dbSelectArticle(req.article, req.previousArticleViewedId)}
+            fs.readFileSync(__dirname + "/article.ejs", 'utf-8'), {
+                articleJson: await dbSelectArticle(req.article, req.previousArticleViewedId),
+                articleRecJson: await dbSelectArticleRecomendations(req.article)
+            }
         );
 
     // If client is requesting article
@@ -62,6 +64,24 @@ async function dbSelectArticle(title, previousArticleViewedId){
         article.articleChainViewedHead = Object.values(result.recordsets[2][0])[0];
         return JSON.stringify(article);
     } catch(e){return false;}
+}
+
+// Dumby function for testing front end recomendations system
+async function dbSelectArticleRecomendations(title){
+    return JSON.stringify([
+        {title: "hey", coverImage: {
+            url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
+            description: "<#this is an image probably#>"
+        }},
+        {title: "bey", coverImage: {
+            url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
+            description: "<#this is an image probably#>"
+        }},
+        {title: "crey", coverImage: {
+            url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
+            description: "<#this is an image probably#>"
+        }}
+    ]);
 }
 
 // Insert new article into DB
