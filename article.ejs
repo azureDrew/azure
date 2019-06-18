@@ -15,10 +15,10 @@
     
         <!-- Parse json, format, and display article recomendations-->
         <div class = "articleContainer" id = "articleRecsContainer"></div>
-        <script> articleRecomendations = <%- articleRecomendations %>; </script>
+        <script> articleRecommendations = <%- articleRecommendations %>; </script>
         <script>
             // Need to build out css for this...
-            articleRecomendations.forEach(rec => {
+            articleRecommendations.forEach(rec => {
                 document.getElementById("articleRecsContainer").innerHTML += rec.title + '<br>';
                 document.getElementById("articleRecsContainer").innerHTML += '<img class = "articleImage" src="' + escapeHTML(rec.coverImage.url) + '">';
             });
