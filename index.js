@@ -20,7 +20,7 @@ module.exports = async function (context, req){
 
     // If client is posting article
     else if(req.query.postArticle)
-        body = await dbInsertArticle(JSON.parse(req.query.postArticle).trim());
+        body = await dbInsertArticle(JSON.parse(req.query.postArticle));
 
     // If client is lost
     else body = false; // Replace with redirect to error.html once made
@@ -41,7 +41,7 @@ async function dbSelectArticle(title){
         // Select row from article table by title and all tags associated with article
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(128), utils.escapeHTML(title).trim())
+            .input('title', sql.VarChar(128), title)
             .query(
                 'SELECT title, author, coverImage, body, time_stamp \
                 FROM dbo.article WHERE title = @title; \
@@ -75,21 +75,12 @@ async function dbInsertArticle(article){
     let maxNumOfTags = 5;
 
     try{
-        // Escape sections of article and convert markdown characters to HTML tags
-        // Elements of body must be either strings or image objects representing images
-        article.coverImage.url = utils.escapeHTML(article.coverImage.url);
-        article.coverImage.description = utils.markupHTML(article.coverImage.description);
-        article.body.forEach((elem, i) => article.body[i] = typeof elem == "string" ?
-            utils.markupHTML(elem) :
-            {url: utils.escapeHTML(elem.url), description: utils.markupHTML(elem.description)}
-        );
-        
         // Connect to DB with pool (if DNE) and set up prepared statement query
         // Insert row into article DB table for new article
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
-            .input('author', sql.VarChar(maxAuthorLen), utils.escapeHTML(article.author))
+            .input('title', sql.VarChar(maxTitleLen), article.title)
+            .input('author', sql.VarChar(maxAuthorLen), article.author)
             .input('coverImage', sql.VarChar(maxImageLen), JSON.stringify(article.coverImage))
             .input('body', sql.VarChar(maxBodyLen), JSON.stringify(article.body));
         let batchInput = 'INSERT INTO dbo.article (title, author, coverImage, body) \
@@ -102,8 +93,8 @@ async function dbInsertArticle(article){
             batchInput += ' INSERT INTO dbo.articleTag (articleTitle, tag) \
                 VALUES(@articleTitle' + a + ', @tag' + a + '); ';
             result = result
-                .input('articleTitle' + a, sql.VarChar(maxTitleLen), utils.escapeHTML(article.title))
-                .input('tag' + a, sql.VarChar(maxTagLen), utils.escapeHTML(article.tags[a]));
+                .input('articleTitle' + a, sql.VarChar(maxTitleLen), article.title)
+                .input('tag' + a, sql.VarChar(maxTagLen), article.tags[a]);
         }
         batchInput += ' END ';
         
