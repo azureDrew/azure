@@ -143,6 +143,7 @@ p.letters{
 
 .articleRecsContainer{
     text-align: center;
+    overflow: visible;
 }
 
 .articleRecTitle{
@@ -155,4 +156,12 @@ p.letters{
     padding: .33em;
     padding-left: .66em;
     color: rgb(35,35,35);
+}
+
+.articleRecomendation:hover{
+    z-index: 100;
+    transform: scale(1.1);
+    -webkit-box-shadow: 1px 10px 70px -16px rgba(0,0,0,0.66);
+    -moz-box-shadow: 1px 10px 70px -16px rgba(0,0,0,0.66);
+    box-shadow: 1px 10px 70px -16px rgba(0,0,0,0.66);
 }
