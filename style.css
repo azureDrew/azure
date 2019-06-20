@@ -3,6 +3,10 @@ html {
     width: 100%;
 }
 
+a{
+    text-decoration: none;   
+}
+
 body{
     overflow: auto;
     font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
