@@ -100,6 +100,7 @@ p.letters{
     padding: 0px;
     left: 0px;
     top: 0px;
+    border-radius: .2em;
 }
 
 .articleImageDescription{
@@ -113,4 +114,40 @@ p.letters{
     line-height: 1.5em;
     letter-spacing: 0.01em;
     font-weight: 400;
+}
+
+.articleRecomendation{
+    position: relative;
+    width: 12em;
+    height: 12em;
+    margin-right: .5em;
+    margin-bottom: 1em;
+    display: inline-block;
+    border-radius: .2em;
+    overflow: hidden;
+    background-color: rgb(195,195,195);
+    border: 1px solid rgb(165,165,165);
+}
+
+.articleThumbImage{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.articleRecsContainer{
+    text-align: center;
+}
+
+.articleRecTitle{
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    background-color: rgba(255,255,255,.8);
+    width: 12em;
+    text-align: left;
+    padding: .33em;
+    padding-left: .66em;
 }
