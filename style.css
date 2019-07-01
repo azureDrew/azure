@@ -76,7 +76,7 @@ p.letters{
     overflow: hidden;
     width: 80%;
     max-width: 38em;
-    min-width: 25em;
+    min-width: 14em;
 }
 
 .articleTag{
