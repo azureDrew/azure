@@ -6,6 +6,7 @@
         <meta name = "viewport" content = "width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://raw.githack.com/azureDrew/azure/master/style.css">
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/escapeAndMarkupHTML.js"></script>
+        <script> window.history.replaceState({}, '', window.location.href.split('&previousArticleViewedId=')[0]);</script>
     </head>
     <body>
         <!-- Format and display article -->
@@ -14,14 +15,8 @@
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/jsonToArticle.js"></script>
     
         <!-- Format and display article recomendations-->
-        <div class = "articleContainer" id = "articleRecsContainer"></div>
+        <div class = "articleContainer articleRecsContainer" id = "articleRecsContainer"></div>
         <script> articleRecommendations = <%- articleRecommendations %>; </script>
-        <script>
-            // Need to build out css for this...
-            articleRecommendations.forEach(rec => {
-                document.getElementById("articleRecsContainer").innerHTML += rec.title + '<br>';
-                document.getElementById("articleRecsContainer").innerHTML += '<img class = "articleImage" src="' + escapeHTML(rec.coverImage.url) + '">';
-            });
-        </script>
+        <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/jsonToArticleRecommendations.js"></script>
     </body>
 </html>
