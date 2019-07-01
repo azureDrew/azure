@@ -94,7 +94,6 @@ p.letters{
     position: relative;
     margin: 1em;
     margin-bottom: 0px;
-    margin-right: 1.33em;
 }
 
 .articleImage{
@@ -125,7 +124,8 @@ p.letters{
     position: relative;
     width: 12em;
     height: 12em;
-    margin-right: .5em;
+    margin-right: .25em;
+    margin-left: .25em;
     margin-bottom: 1em;
     display: inline-block;
     border-radius: .2em;
