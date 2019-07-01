@@ -4,7 +4,7 @@ let sql = require('mssql');
 let utils = require('./utils');
 let pool;
 
-module.exports = async function (context, req){
+module.exports = async function(context, req){
     let body = "";
     req = req.query;
     
@@ -23,7 +23,8 @@ module.exports = async function (context, req){
 
     // If client is posting article
     else if(req.postArticle)
-        body = await dbInsertArticle(JSON.parse(req.postArticle));
+        body = await dbInsertArticle(utils.testArticle);
+        //body = await dbInsertArticle(JSON.parse(req.postArticle));
 
     // If client is lost
     else body = false; // Replace with redirect to error.html once made
@@ -61,7 +62,7 @@ async function dbSelectArticle(title, previousArticleViewedId){
         article.body = JSON.parse(article.body);
         article.tags = result.recordsets[1];
         article.coverImage = JSON.parse(article.coverImage);
-        article.articleChainViewedHead = Object.values(result.recordsets[2][0])[0];
+        article.previousArticleViewedId = Object.values(result.recordsets[2][0])[0];
         return JSON.stringify(article);
     } catch(e){return false;}
 }
@@ -69,15 +70,15 @@ async function dbSelectArticle(title, previousArticleViewedId){
 // Dumby function for testing front end recommendations system
 async function dbSelectArticleRecommendations(title){
     return JSON.stringify([
-        {title: "hey", coverImage: {
+        {title: "test number 38", coverImage: {
             url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
             description: "<#this is an image probably#>"
         }},
-        {title: "bey", coverImage: {
+        {title: "test number 37", coverImage: {
             url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
             description: "<#this is an image probably#>"
         }},
-        {title: "crey", coverImage: {
+        {title: "test number 36", coverImage: {
             url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
             description: "<#this is an image probably#>"
         }}
