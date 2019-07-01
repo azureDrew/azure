@@ -28,7 +28,6 @@ else{
 	);
 	document.getElementById("articleBody").innerHTML = body;
 	
-	
 	// Use cookie value to tell server most recently viewed article upon new article request
 	// Update cookie value when new article is received by client such that article chain continues. 
 	// Replace current url such that previousArticleViewedId info is removed
