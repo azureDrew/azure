@@ -35,11 +35,13 @@ else{
 	);
 	document.getElementById("articleBody").innerHTML = body;
 	
+	/*
 	// Use cookie value to tell server most recently viewed article upon new article request
 	// Update cookie value when new article is received by client such that article chain continues. 
 	// Replace current url such that previousArticleViewedId info is removed
 	document.cookie = "previousArticleViewedId = " + article.previousArticleViewedId;
         window.history.replaceState({}, '', window.location.href.split('&previousArticleViewedId=')[0]);
+	*/
 	
 	// Adjust article appearence if client is not mobile
 	if(!window.mobilecheck()){
