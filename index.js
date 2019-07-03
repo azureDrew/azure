@@ -12,18 +12,19 @@ module.exports = async function(context, req){
     if(req.article) 
         body = ejs.render(
             fs.readFileSync(__dirname + "/article.ejs", 'utf-8'), {
-                article: await dbSelectArticle(req.article, req.previousArticleViewedId),
+                article: await dbSelectArticle(req.article, req.previousPage),
                 articleRecommendations: await dbSelectArticleRecommendations(req.article)
             }
         );
 
     // If client is requesting article
     else if(req.getArticle)
-        body = await dbSelectArticle(req.getArticle, req.previousArticleViewedId);
+        body = await dbSelectArticle(req.getArticle, req.previousPage);
 
     // If client is posting article
     else if(req.postArticle)
-        body = await dbInsertArticle(JSON.parse(req.postArticle));
+        body = await dbInsertArticle(utils.testArticle);
+        //body = await dbInsertArticle(JSON.parse(req.postArticle));
 
     // If client is lost
     else body = false; // Replace with redirect to error.html once made
@@ -38,7 +39,7 @@ module.exports = async function(context, req){
 
 // Get article from DB by given title
 // input: string, string
-async function dbSelectArticle(title, previousArticleViewedId){
+async function dbSelectArticle(title, previousPage){
     try{
         // Connect to DB with pool (if DNE) and set up prepared statement query
         // Select row from article table by title and all tags associated with it
@@ -46,13 +47,13 @@ async function dbSelectArticle(title, previousArticleViewedId){
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(128), title)
-            .input('previousArticleViewedId', sql.Int, previousArticleViewedId)
+            .input('previousPage', sql.VarChar(256), previousPage)
             .query(
                 'SELECT title, author, coverImage, body, time_stamp \
                     FROM dbo.article WHERE title = @title; \
                 SELECT tag FROM articleTag WHERE articleTitle = @title; \
-                INSERT into dbo.articleView (articleTitle, previousArticleViewedId) \
-                    VALUES(@title, @previousArticleViewedId) \
+                INSERT into dbo.articleViewed (articleTitle, previousPage) \
+                    VALUES(@title, @previousPage) \
                 SELECT SCOPE_IDENTITY();'
             );
 
@@ -61,27 +62,45 @@ async function dbSelectArticle(title, previousArticleViewedId){
         article.body = JSON.parse(article.body);
         article.tags = result.recordsets[1];
         article.coverImage = JSON.parse(article.coverImage);
-        article.previousArticleViewedId = Object.values(result.recordsets[2][0])[0];
+        //article.previousArticleViewedId = Object.values(result.recordsets[2][0])[0];
         return JSON.stringify(article);
     } catch(e){return false;}
 }
 
-// Dumby function for testing front end recommendations system
+// Get recommended articles similar to input article
+// input: string
 async function dbSelectArticleRecommendations(title){
-    return JSON.stringify([
-        {title: "test number 38", coverImage: {
-            url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
-            description: "<#this is an image probably#>"
-        }},
-        {title: "test number 37", coverImage: {
-            url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
-            description: "<#this is an image probably#>"
-        }},
-        {title: "test number 36", coverImage: {
-            url: "https://spectrum.ieee.org/image/MzMwOTQ1NA.jpeg",
-            description: "<#this is an image probably#>"
-        }}
-    ]);
+    let maxAge = 1000000; // micoseconds
+
+    try{
+        // Connect to DB with pool (if DNE) and set up prepared statement query
+        // Select most recent row in articleRecommendations table for given article
+        pool = pool || await sql.connect(utils.connectionObj);
+        let result = await pool.request()
+            .input('title', sql.VarChar(128), title)
+            .query(
+                'SELECT TOP (1) recommendations, time_stamp FROM dbo.articleRecommendations \
+                WHERE articleTitle = @title ORDER BY id DESC;'
+            );
+        
+        // If article does not have recommendations associated with it 
+        // or its recommendations have not been updated recently, 
+        // update its recommendations, then return result
+        if(result.recordsets[0].length == 0){
+            updateArticleRecs(title);
+            return false;
+        } else {
+            let currentTime = (new Date).getTime();
+            let lastUpdate = (new Date(result.recordsets[0][0].time_stamp)).getTime();
+            if(currentTime - lastUpdate > maxAge) updateArticleRecommendations(title);
+            return result.recordsets[0][0].recommendations;
+        }
+    } catch(e){return e;}
+}
+
+// Update the recommendations associated with a given article
+async function updateArticleRecommendations(title){
+    return true;
 }
 
 // Insert new article into DB
@@ -128,4 +147,9 @@ async function dbInsertArticle(article){
         // Execute query and return outcome
         return (await result.query(batchInput)).rowsAffected[0] == 1 ? true : false;
     } catch(e){return false;}
+}
+
+// Create filter for article which is later used to determin similarity to other articles
+async function buildFilter(article){
+    return true;
 }
