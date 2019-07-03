@@ -23,8 +23,7 @@ module.exports = async function(context, req){
 
     // If client is posting article
     else if(req.postArticle)
-        body = await dbInsertArticle(utils.testArticle);
-        //body = await dbInsertArticle(JSON.parse(req.postArticle));
+        body = await dbInsertArticle(JSON.parse(req.postArticle));
 
     // If client is lost
     else body = false; // Replace with redirect to error.html once made
