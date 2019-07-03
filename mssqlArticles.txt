@@ -14,16 +14,16 @@ CREATE TABLE articleTag (
     time_stamp DATETIME DEFAULT GETDATE()
 );
 
-CREATE TABLE articleView (
-    id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
-    articleTitle VARCHAR(128) NOT NULL FOREIGN KEY REFERENCES article(title),
-    previousArticleViewedId INT DEFAULT NULL,
-    time_stamp DATETIME DEFAULT GETDATE()
-);
-
 CREATE TABLE articleViewed (
     id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
     articleTitle VARCHAR(128) NOT NULL FOREIGN KEY REFERENCES article(title),
     previousPage VARCHAR(256) DEFAULT NULL,
+    time_stamp DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE articleRecommendations (
+    id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+    articleTitle VARCHAR(128) NOT NULL FOREIGN KEY REFERENCES article(title),
+    recommendations VARCHAR(1024) DEFAULT NULL,
     time_stamp DATETIME DEFAULT GETDATE()
 );
