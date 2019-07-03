@@ -4,10 +4,16 @@
         <title>Article</title>
         <meta charset = "UTF-8">
         <meta name = "viewport" content = "width=device-width, initial-scale=1">
+
+        <!-- Import necessary files utalized by scripts in body -->
         <link rel="stylesheet" href="https://raw.githack.com/azureDrew/azure/master/style.css">
+        <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/mobileCheck.js"></script>
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/escapeAndMarkupHTML.js"></script>
+
+        <!-- Remove all url variables that add clutter/confussion to url -->
+        <script> window.history.replaceState({}, '', window.location.href.split('&previousPage=')[0]);</script>
     </head>
-    <body>
+    <body id = "body">
         <!-- Format and display article -->
         <div class = "articleContainer" id = "articleContainer"></div>
         <script> article = <%- article %>; </script>
