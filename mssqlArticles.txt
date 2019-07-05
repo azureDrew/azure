@@ -3,6 +3,7 @@ CREATE TABLE article (
     author VARCHAR(64) NOT NULL,
     coverImage VARCHAR(1024) NOT NULL,
     body VARCHAR(8000) NOT NULL,
+    bloomFilter INT NULL,
     time_stamp DATETIME DEFAULT GETDATE()
 );
 
