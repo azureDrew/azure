@@ -16,12 +16,12 @@
     <body id = "body">
         <!-- Format and display article -->
         <div class = "articleContainer" id = "articleContainer"></div>
-        <script> article = <%- article %>; </script>
+        <script> try{article = <%- article %>;}catch(e){} </script>
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/jsonToArticle.js"></script>
     
         <!-- Format and display article recomendations-->
         <div class = "articleContainer articleRecsContainer" id = "articleRecsContainer"></div>
-        <script> articleRecommendations = <%- articleRecommendations %>; </script>
+        <script> try{articleRecommendations = <%- articleRecommendations %>;}catch(e){} </script>
         <script type="text/javascript" src="https://raw.githack.com/azureDrew/azure/master/jsonToArticleRecommendations.js"></script>
     </body>
 </html>
