@@ -26,6 +26,10 @@ module.exports = async function(context, req){
     else if(req.postArticle)
         body = await dbInsertArticle(JSON.parse(req.postArticle));
 
+    // If client is requesting recommended similar articles to input article
+    else if(req.getArticleRecommendations)
+        body = await dbSelectArticleRecommendations(req.getArticleRecommendations);
+
     // If client is lost
     else body = false; // Replace with redirect to error.html once made
 
@@ -127,10 +131,9 @@ async function dbInsertArticle(article){
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// Create (4 hash, 32 bit) bloom filter for article
+// Create (4 hash, 32 bit) bloom filter for article as 32 bit, possitive int
 // Use article tags to determin set membership
 // input: [string, ...]
-// output: 32 bit integer (bloom filter)
 async function buildArticleFilter(tags){
     let maxNumOfTags = 5;
     let bloom = new bf.BloomFilter(32, 4);
@@ -173,6 +176,7 @@ async function dbSelectArticleRecommendations(title){
 }
 
 // Update recommendations associated with given article
+// input: string, int
 async function updateArticleRecommendations(title, numRecommendations = 3){
     let maxTitleLen = 128;
     let maxRecommendationsLen = 1024;
