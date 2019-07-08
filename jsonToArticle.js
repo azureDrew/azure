@@ -1,7 +1,7 @@
 // Server returns false if article DNE or error occured
 // Only attempt to populate page with article content if no such error occured and article exists
 if(article == false) document.getElementById("articleContainer").innerHTML = 'Article does not exist';
-else{
+else if(article != null){
 	// Create skeleton for article to fill on page
 	document.getElementById("articleContainer").innerHTML = '' +
 		'<div class = "articleSubsectionContainer centerText" id = "articleTitle"></div>' +
