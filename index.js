@@ -10,9 +10,9 @@ let maxTagLen = 24;
 let filterSize = 32;
 let maxNumOfTags = 5;
 let maxImgLen = 1024;
+let maxBodyLen = 8000;
 let maxTitleLen = 128;
 let maxAuthorLen = 64;
-let maxBodyLen = 8000;
 let maxPreviousPageLen = 256;
 let maxRecommendationsLen = 1024;
 let maxRecommendationsAge = 1000000; // microseconds
@@ -35,7 +35,8 @@ module.exports = async function(context, req){
 
     // If client is posting article
     else if(req.postArticle)
-        body = await dbInsertArticle(JSON.parse(req.postArticle));
+        var body = await dbInsertArticle(utils.testArticle);
+        //body = await dbInsertArticle(JSON.parse(req.postArticle));
 
     // If client is requesting recommended similar articles to input article
     else if(req.getArticleRecommendations)
@@ -193,7 +194,7 @@ async function dbSelectArticleRecommendations(title){
 
 // Update recommendations associated with given article
 // input: string, int
-async function dbInsertArticleRecommendations(title, numRecommendations = 3){
+async function dbInsertArticleRecommendations(title, numRecs = 3){
     try{
         // Connect to DB with pool (if DNE) and set up prepared statement query
         // Select all articles and relavent data for recommendations
@@ -215,19 +216,17 @@ async function dbInsertArticleRecommendations(title, numRecommendations = 3){
         
         // Compare all filters to given article filter using bloom filter hamming distance
         // Order comparisons such that best recommendations appear last in array
-        let buckets = [];
-        for(a = 0; a < filterSize; a++) buckets.push([]);
-        while(row = allFilters.pop()) if(typeof row.bloomFilter == 'number')
-            buckets[(aFilter & row.bloomFilter).toString(2).match(/1/g).length].push({
-                title: row.title,
-                coverImage: JSON.parse(row.coverImage)
-            });
+        let buckets = new Array(filterSize).fill(null).map(e => []); 
+        while(row = allFilters.pop()) 
+            if(typeof row.bloomFilter == 'number')
+                buckets[(aFilter & row.bloomFilter).toString(2).match(/1/g).length].push({
+                    title: row.title,
+                    coverImage: JSON.parse(row.coverImage)
+                });
 
-        // Flatten buckets array and store last "numRecommendations" elements
-        // Store new recommendations in articleRecommendations table and return query result
-        let recommendations = JSON.stringify(
-            [].concat(...buckets.filter(e => e != null)).slice(-numRecommendations)
-        );
+        // Flatten buckets array and store last "numRecs" elements
+        // Store new recommendations in articleRecommendations table and return result
+        let recommendations = JSON.stringify([].concat(...buckets).slice(-numRecs));
         result = await pool.request()
             .input('title', sql.VarChar(maxTitleLen), title)
             .input('recommendations', sql.VarChar(maxRecommendationsLen), recommendations)
