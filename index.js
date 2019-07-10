@@ -101,13 +101,13 @@ async function dbInsertArticle(article){
         // Format article tags into array
         let tags = article.tags.split(',').map(t => t.trim());
 
-        // Format article cover image into stringified object
+        // Format article cover image into object
         let coverImage = {
             url: article.coverImageUrl.trim(),
             description: article.coverImageDescription.trim()
         };
 
-        // Format article body into stringified array of strings and/or image objects
+        // Format article body into array of strings and/or image objects
         let body = article.body.split('\n\n').map(section => {
             return section.substring(0, 5) == 'url: ' ? {
                 url: section.split('\n')[0].replace('url: ', '').trim(), 
@@ -130,11 +130,11 @@ async function dbInsertArticle(article){
         // Only insert first maxNumOfTags tags and only if article insert was successful
         batchInput += ' IF @@ROWCOUNT = 1 BEGIN ';
         for(a = 0; a < tags.length && a < maxNumOfTags; a++){ 
-            batchInput += ' INSERT INTO articleTag (articleTitle, tag) \
-                VALUES(@articleTitle' + a + ', @tag' + a + '); ';
             result = result
                 .input('articleTitle' + a, sql.VarChar(maxTitleLen), article.title)
                 .input('tag' + a, sql.VarChar(maxTagLen), tags[a]);
+            batchInput += ' INSERT INTO articleTag (articleTitle, tag) \
+                VALUES(@articleTitle' + a + ', @tag' + a + '); ';
         }
         batchInput += ' END ';
         
@@ -215,6 +215,7 @@ async function dbInsertArticleRecommendations(title, numRecs = 3){
     try{
         // Connect to DB with pool (if DNE) and set up prepared statement query
         // Select all articles and relavent data for recommendations
+        // If filter DNE for article that does exist, create filter
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(maxTitleLen), title)
@@ -222,19 +223,13 @@ async function dbInsertArticleRecommendations(title, numRecs = 3){
                 'SELECT title, bloomFilter, coverImage FROM article WHERE title != @title; \
                 SELECT bloomFilter FROM article WHERE title = @title;'       
             );
-        
-        // If input article DNE, return false
-        // Otherwise, store results and continue
-        // If filter DNE for article that does exist, create filter
-        if(result.recordsets[1].length != 1) return false;
-        let allFilters = result.recordsets[0];
         let aFilter = result.recordsets[1][0].bloomFilter;
         if(typeof aFilter != 'number') aFilter = await dbUpdateArticleFilter(title);
         
         // Compare all articles to given article using bloom filter pseudo hamming distance
         // Order comparisons such that best recommendations appear last in array
         let buckets = new Array(filterSize).fill(null).map(e => []); 
-        while(row = allFilters.pop()) 
+        while(row = result.recordsets[0].pop()) 
             if(typeof row.bloomFilter == 'number')
                 buckets[(aFilter & row.bloomFilter).toString(2).match(/1/g).length].push({
                     title: row.title,
