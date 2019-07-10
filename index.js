@@ -35,7 +35,7 @@ module.exports = async function(context, req){
 
     // If client is posting article
     else if(req.postArticle)
-        body = await dbInsertArticle(JSON.parse(req.postArticle));
+        var body = await dbInsertArticle(JSON.parse(req.postArticle));
 
     // If client is requesting recommended similar articles to input article
     else if(req.getArticleRecommendations)
