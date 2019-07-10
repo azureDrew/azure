@@ -99,16 +99,16 @@ async function dbSelectArticle(title, previousPage){
 async function dbInsertArticle(article){
     try{
         // Format article tags into array
-        tags = article.tags.split(',').map(t => t.trim());
+        let tags = article.tags.split(',').map(t => t.trim());
 
         // Format article cover image into stringified object
-        coverImage = {
+        let coverImage = {
             url: article.coverImageUrl.trim(),
             description: article.coverImageDescription.trim()
         };
 
         // Format article body into stringified array of strings and/or image objects
-        body = article.body.split('\n\n').map(section => {
+        let body = article.body.split('\n\n').map(section => {
             return section.substring(0, 5) == 'url: ' ? {
                 url: section.split('\n')[0].replace('url: ', '').trim(), 
                 description: section.split('\n')[1].replace('description: ', '').trim()
