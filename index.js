@@ -112,7 +112,7 @@ async function dbInsertArticle(article){
             return section.substring(0, 5) == 'url: ' ? {
                 url: section.split('\n')[0].replace('url: ', '').trim(), 
                 description: section.split('\n')[1].replace('description: ', '').trim()
-            } : section;
+            } : section.trim();
         });
 
         // Connect to DB with pool (if DNE) and set up prepared statement query
