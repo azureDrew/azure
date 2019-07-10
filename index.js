@@ -35,8 +35,7 @@ module.exports = async function(context, req){
 
     // If client is posting article
     else if(req.postArticle)
-        var body = await dbInsertArticle(utils.testArticle);
-        //body = await dbInsertArticle(JSON.parse(req.postArticle));
+        body = await dbInsertArticle(JSON.parse(req.postArticle));
 
     // If client is requesting recommended similar articles to input article
     else if(req.getArticleRecommendations)
@@ -59,13 +58,13 @@ module.exports = async function(context, req){
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 
-// Get article from DB by given title
+// Get article from DB by given title and log traffic
 // input: string, string
 async function dbSelectArticle(title, previousPage){
     try{
         // Connect to DB with pool (if DNE) and set up prepared statement query
         // Select row from article table by title and all tags associated with it
-        // Insert row into articleView table to log traffic, then output id for row
+        // Insert row into articleView table to log traffic
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input('title', sql.VarChar(maxTitleLen), title)
@@ -92,32 +91,50 @@ async function dbSelectArticle(title, previousPage){
 // input: {
 //    title: string,
 //    author: string,
-//    tags: [string, ...],
-//    coverImage: {url: string, description: string},
-//    body: [string, {url: string, description: string}, ...]
+//    tags: string,
+//    body: string,
+//    coverImageUrl: string,
+//    coverImageDescription: string
 // }
 async function dbInsertArticle(article){
     try{
+        // Format article tags into array
+        tags = article.tags.split(',').map(t => t.trim());
+
+        // Format article cover image into stringified object
+        coverImage = {
+            url: article.coverImageUrl.trim(),
+            description: article.coverImageDescription.trim()
+        };
+
+        // Format article body into stringified array of strings and/or image objects
+        body = article.body.split('\n\n').map(section => {
+            return section.substring(0, 5) == 'url: ' ? {
+                url: section.split('\n')[0].replace('url: ', '').trim(), 
+                description: section.split('\n')[1].replace('description: ', '').trim()
+            } : section;
+        });
+
         // Connect to DB with pool (if DNE) and set up prepared statement query
         // Insert row into article DB table for new article
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
-            .input('title', sql.VarChar(maxTitleLen), article.title)
-            .input('author', sql.VarChar(maxAuthorLen), article.author)
-            .input('coverImage', sql.VarChar(maxImgLen), JSON.stringify(article.coverImage))
-            .input('body', sql.VarChar(maxBodyLen), JSON.stringify(article.body));
+            .input('title', sql.VarChar(maxTitleLen), article.title.trim())
+            .input('author', sql.VarChar(maxAuthorLen), article.author.trim())
+            .input('coverImage', sql.VarChar(maxImgLen), JSON.stringify(coverImage))
+            .input('body', sql.VarChar(maxBodyLen), JSON.stringify(body));
         let batchInput = 'INSERT INTO article (title, author, coverImage, body) \
             VALUES(@title, @author, @coverImage, @body) ';
         
         // For each articleTag, insert row into articleTag table
         // Only insert first maxNumOfTags tags and only if article insert was successful
         batchInput += ' IF @@ROWCOUNT = 1 BEGIN ';
-        for(a = 0; a < article.tags.length && a < maxNumOfTags; a++){ 
+        for(a = 0; a < tags.length && a < maxNumOfTags; a++){ 
             batchInput += ' INSERT INTO articleTag (articleTitle, tag) \
                 VALUES(@articleTitle' + a + ', @tag' + a + '); ';
             result = result
                 .input('articleTitle' + a, sql.VarChar(maxTitleLen), article.title)
-                .input('tag' + a, sql.VarChar(maxTagLen), article.tags[a]);
+                .input('tag' + a, sql.VarChar(maxTagLen), tags[a]);
         }
         batchInput += ' END ';
         
@@ -206,15 +223,15 @@ async function dbInsertArticleRecommendations(title, numRecs = 3){
                 SELECT bloomFilter FROM article WHERE title = @title;'       
             );
         
-        // If input article does not exists, return false
+        // If input article DNE, return false
         // Otherwise, store results and continue
-        // If filter DNE for an article that does exist, create its filter
+        // If filter DNE for article that does exist, create filter
         if(result.recordsets[1].length != 1) return false;
-        let aFilter = result.recordsets[1][0].bloomFilter;
         let allFilters = result.recordsets[0];
+        let aFilter = result.recordsets[1][0].bloomFilter;
         if(typeof aFilter != 'number') aFilter = await dbUpdateArticleFilter(title);
         
-        // Compare all filters to given article filter using bloom filter hamming distance
+        // Compare all articles to given article using bloom filter pseudo hamming distance
         // Order comparisons such that best recommendations appear last in array
         let buckets = new Array(filterSize).fill(null).map(e => []); 
         while(row = allFilters.pop()) 
