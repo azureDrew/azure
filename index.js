@@ -18,28 +18,29 @@ let maxRecommendationsLen = 1024;
 let maxRecommendationsAge = 1000000; // microseconds
 
 module.exports = async function(context, req){
-    req = req.query;
+    reqGet = req.query || {};
+    reqPost = req.body || {};
     
     // If client is requesting webpage with article
-    if(req.article) 
+    if(reqGet.article) 
         var body = ejs.render(
             fs.readFileSync(__dirname + "/article.ejs", 'utf-8'), {
-                article: await dbSelectArticle(req.article, req.previousPage),
-                articleRecommendations: await dbSelectArticleRecommendations(req.article)
+                article: await dbSelectArticle(reqGet.article, reqGet.previousPage),
+                articleRecommendations: await dbSelectArticleRecommendations(reqGet.article)
             }
         );
 
     // If client is requesting article
-    else if(req.getArticle)
-        var body = await dbSelectArticle(req.getArticle, req.previousPage);
+    else if(reqGet.getArticle)
+        var body = await dbSelectArticle(reqGet.getArticle, reqGet.previousPage);
 
     // If client is posting article
-    else if(req.postArticle)
-        var body = await dbInsertArticle(JSON.parse(req.postArticle));
+    else if(reqPost.postArticle)
+        var body = await dbInsertArticle(JSON.parse(reqPost.postArticle));
 
     // If client is requesting recommended similar articles to input article
-    else if(req.getArticleRecommendations)
-        var body = await dbSelectArticleRecommendations(req.getArticleRecommendations);
+    else if(reqGet.getArticleRecommendations)
+        var body = await dbSelectArticleRecommendations(reqGet.getArticleRecommendations);
 
     // If client is lost
     else var body = false; // Replace with redirect to error.html once made
@@ -108,6 +109,8 @@ async function dbInsertArticle(article){
         };
 
         // Format article body into array of strings and/or image objects
+        while(article.body.includes('\n\n\n')) // Need to make this line not dumb...
+            article.body = article.body.split('\n\n\n').join('\n\n');
         let body = article.body.split('\n\n').map(section => {
             return section.substring(0, 5) == 'url: ' ? {
                 url: section.split('\n')[0].replace('url: ', '').trim(), 
