@@ -248,5 +248,5 @@ async function dbInsertArticleRecommendations(title, numRecs = 3){
                 VALUES(@title, @recommendations)'
             );
         return result.rowsAffected[0] == 1 ? true : false;
-    } catch(e){return e;}
+    } catch(e){return false;}
 }
