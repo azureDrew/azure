@@ -149,7 +149,7 @@ async function dbInsertArticle(article){
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 
-// Create (4 hash, 32 bit) bloom filter for article as 32 bit, possitive int
+// Create (4 hash, 32 bit) bloom filter for article as 32 bit int
 // Use article tags to determin set membership
 // Update article table row with given title with new filter
 // input: string
@@ -167,7 +167,7 @@ async function dbUpdateArticleFilter(title){
         let bloom = new bf.BloomFilter(filterSize, hashCount);
         for(a = 0; a < tags.length && a < maxNumOfTags; a++)
             bloom.add(tags[a]);
-        let filter = ([].slice.call(bloom.buckets)[0] >>> 0);
+        let filter = [].slice.call(bloom.buckets)[0];
 
         // Update article row with created filter and return filter
         result = await pool.request()
@@ -225,13 +225,14 @@ async function dbInsertArticleRecommendations(title, numRecs = 3){
             );
         let aFilter = result.recordsets[1][0].bloomFilter;
         if(typeof aFilter != 'number') aFilter = await dbUpdateArticleFilter(title);
-        
+
         // Compare all articles to given article using bloom filter pseudo hamming distance
         // Order comparisons such that best recommendations appear last in array
         let buckets = new Array(filterSize).fill(null).map(e => []); 
         while(row = result.recordsets[0].pop()) 
             if(typeof row.bloomFilter == 'number')
-                buckets[(aFilter & row.bloomFilter).toString(2).match(/1/g).length].push({
+                buckets[(((aFilter & row.bloomFilter) >>> 0)
+                .toString(2).match(/1/g) || "").length].push({
                     title: row.title,
                     coverImage: JSON.parse(row.coverImage)
                 });
@@ -247,5 +248,5 @@ async function dbInsertArticleRecommendations(title, numRecs = 3){
                 VALUES(@title, @recommendations)'
             );
         return result.rowsAffected[0] == 1 ? true : false;
-    } catch(e){return false;}
+    } catch(e){return e;}
 }
