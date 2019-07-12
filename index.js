@@ -25,16 +25,19 @@ module.exports = async function(context, req){
     if(reqGet.article) 
         var body = ejs.render(
             fs.readFileSync(__dirname + "/article.ejs", 'utf-8'), {
-                article: await dbSelectArticle(reqGet.article, reqGet.previousPage),
-                articleRecommendations: await dbSelectArticleRecommendations(reqGet.article)
+                article: JSON.stringify(
+                    await dbSelectArticle(reqGet.article, reqGet.previousPage)
+                ), articleRecommendations: JSON.stringify(
+                    await dbSelectArticleRecommendations(reqGet.article)
+                )
             }
         );
 
     // If client is requesting article
     else if(reqGet.getArticle)
         var body = JSON.stringify({
-            article: JSON.parse(await dbSelectArticle(reqGet.getArticle, reqGet.previousPage)),
-            articleRecommendations: JSON.parse(await dbSelectArticleRecommendations(reqGet.getArticle))
+            article: await dbSelectArticle(reqGet.getArticle, reqGet.previousPage), 
+            articleRecommendations: await dbSelectArticleRecommendations(reqGet.getArticle)
         });
 
     // If client is posting article
@@ -82,7 +85,7 @@ async function dbSelectArticle(title, previousPage){
         article.body = JSON.parse(article.body);
         article.tags = result.recordsets[1];
         article.coverImage = JSON.parse(article.coverImage);
-        return JSON.stringify(article);
+        return article;
     } catch(e){return false;}
 }
 
@@ -206,7 +209,7 @@ async function dbSelectArticleRecommendations(title){
             let lastUpdate = (new Date(result.recordsets[0][0].time_stamp)).getTime();
             if(currentTime - lastUpdate > maxRecommendationsAge) 
                 dbInsertArticleRecommendations(title);
-            return result.recordsets[0][0].recommendations;
+            return JSON.parse(result.recordsets[0][0].recommendations);
         }
     } catch(e){return false;}
 }
