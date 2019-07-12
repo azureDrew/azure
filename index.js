@@ -32,15 +32,14 @@ module.exports = async function(context, req){
 
     // If client is requesting article
     else if(reqGet.getArticle)
-        var body = await dbSelectArticle(reqGet.getArticle, reqGet.previousPage);
+        var body = {
+            article: await dbSelectArticle(reqGet.getArticle, reqGet.previousPage),
+            articleRecommendations: await dbSelectArticleRecommendations(reqGet.getArticle)
+        }
 
     // If client is posting article
     else if(reqPost.postArticle)
         var body = await dbInsertArticle(JSON.parse(reqPost.postArticle));
-
-    // If client is requesting recommended similar articles to input article
-    else if(reqGet.getArticleRecommendations)
-        var body = await dbSelectArticleRecommendations(reqGet.getArticleRecommendations);
 
     // If client is lost
     else var body = false; // Replace with redirect to error.html once made
