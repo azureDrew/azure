@@ -32,10 +32,10 @@ module.exports = async function(context, req){
 
     // If client is requesting article
     else if(reqGet.getArticle)
-        var body = {
+        var body = JSON.stringify({
             article: await dbSelectArticle(reqGet.getArticle, reqGet.previousPage),
             articleRecommendations: await dbSelectArticleRecommendations(reqGet.getArticle)
-        }
+        });
 
     // If client is posting article
     else if(reqPost.postArticle)
@@ -225,6 +225,7 @@ async function dbInsertArticleRecommendations(title, numRecs = 3){
                 'SELECT title, bloomFilter, coverImage FROM article WHERE title != @title; \
                 SELECT bloomFilter FROM article WHERE title = @title;'       
             );
+        if(result.recordsets[1].length != 1) return false;
         let aFilter = result.recordsets[1][0].bloomFilter;
         if(typeof aFilter != 'number') aFilter = await dbUpdateArticleFilter(title);
 
