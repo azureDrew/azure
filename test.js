@@ -24,7 +24,7 @@ async function dbInsert(table, entries){
         // Build out prepared statement (result).
         let columns = " (";
         let values = " VALUES( ";
-        let entriesLength = entries.length() - 1;
+        let entriesLength = Object.keys(entries).length() - 1;
         entries.forEach((entry, counter) => {
             columns += entry.field + (counter != entriesLength ? ", " : ") ");
             values += "@" + entry.field + (counter != entriesLength ? ", " : ") ");
