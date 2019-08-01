@@ -13,11 +13,15 @@ utils.dbFieldTypeMap = {
     // ...
 }
 
-// Objects in DB represented by a (object, objectStatus, objectContent) triplett of tables
+// Objects in DB represented by (object, objectStatus, objectContent) triplett of tables
 utils.statusContentObjects = ["user", "post", "group"];
 
 // List of all table names in DB
 utils.dbTableNames = ["" /* ... */];
+
+async function checkUserPermission(userId){
+    return true;
+}
 
 // Insert "entries" into "table" in DB.
 async function dbInsert(table, entries){
@@ -37,7 +41,7 @@ async function dbInsert(table, entries){
         entries.forEach((entry, counter) => {
             columns += entry.field + (counter != entriesLength ? ", " : ") ");
             values += "@" + entry.field + (counter != entriesLength ? ", " : ") ");
-            result = result.input(entry.field, utiles.dbFieldTypeMap[entry.field], entry.val);
+            result = result.input(entry.field, utils.dbFieldTypeMap[entry.field], entry.val);
         });
 
         // Attempt insert and return success or failure result.
@@ -49,26 +53,72 @@ async function dbInsert(table, entries){
     }
 }
 
-// Get a given object's content and status by its respective table ID
+// Get given object's content and status by its respective table id
 getObject(type, objectId){
     try{
         // If "type" is not an allowed object type, return false
         if(!utils.statusContentObjects.includes(type)) return false;
         
-        // Set up connection pool, build prepared query, send query, and return result
+        // Set up connection pool, build prepared query, and send query
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request()
             .input("id", sql.Int, objectId)
             .query(
-                "SELECT TOP(1) * FROM dbo." + type + "Status WHERE " + type + "Id = @id ORDER BY id DESC;"
-                "SELECT TOP(1) * FROM dbo." + type + "Content WHERE " + type + "Id = @id ORDER BY id DESC;"
+                "SELECT TOP(1) * FROM dbo." + type + "Status WHERE " + type + 
+                "Id = @id ORDER BY id DESC;"
+                "SELECT TOP(1) * FROM dbo." + type + "Content WHERE " + type + 
+                "Id = @id ORDER BY id DESC;"
             );
         
         // Return object content and status if object's status != hidden
         return result.recordsets[1][0] != 0 ? {
-            status: result.recordsets[1][0],
-            content: result.recordsets[0][0] 
+            status: result.recordsets[0][0],
+            content: result.recordsets[1][0] 
         } : false;
+    } catch(e) {
+        // log error and return false
+        return false;
+    }
+}
+
+// Get list of (content, status) objects by a common superObject's respective id
+getSubObjects(type, superType, superId){
+    try{
+        // If "type" or "superType" is not an allowed object type, return false
+        if(!utils.statusContentObjects.includes(type)) return false;
+        if(!utils.statusContentObjects.includes(superType)) return false;
+        
+        // Set up connection pool, build prepared query, and send query
+        /*pool = pool || await sql.connect(utils.connectionObj);
+        let result = await pool.request()
+            .input()
+            .query();
+        
+        // Return list of objects contents and statuses
+        return result.recordsets[0][0];*/
+    } catch(e) {
+        // log error and return false
+        return false;
+    }
+}
+
+// Get list of recommendations for similar objects to object by id
+getRecommendations(type, objectId){
+    try{
+        // If "type" or "superType" is not an allowed object type, return false
+        if(!utils.statusContentObjects.includes(type)) return false;
+        
+        // Set up connection pool, build prepared query, and send query
+        pool = pool || await sql.connect(utils.connectionObj);
+        let result = await pool.request()
+            .input("id", sql.Int, objectId)
+            .query(
+                "SELECT TOP(1) * FROM dbo." + type + "Recommendations WHERE " + type + 
+                "Id = @id ORDER BY id DESC;"
+            );
+        
+        // Return recommendations for objects
+        return result.recordsets.length == 1 ? JSON.parse(result.recordsets[0]) : false;
     } catch(e) {
         // log error and return false
         return false;
