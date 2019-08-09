@@ -23,23 +23,17 @@ async function dbConnect() {
     } catch(e) {return logError(e);}
 }
 
-// Insert "entries" into "table" in DB.
+// Attempt to insert "entries" into "table" in DB.
 async function dbInsert(table, entries) {
     try {
-        // Verify table then set up DB connection
-        if(dbTables[table] == null) return false;
-        let result = await dbConnect();
-
-        // Create string for sql query and build out prepared statement
         let columns, values;
+        let result = await dbConnect();
         entries.forEach(entry => {
             columns += `${entry.field},`;
             values += `@${entry.field},`;
             result = result.input(entry.field, dbTables[table][entry.field], entry.val);
         });
-        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`;
-
-        // Attempt insert and return success or failure result.
+        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`; //.splice(0,-1)
         return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
     } catch(e) {return logError(e);}
 }
