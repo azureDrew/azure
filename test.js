@@ -1,4 +1,4 @@
-const dbTables{
+const dbTables = {
     testTableUno: {
         myFirstCol: sql.VARCHAR(32),
         mySecondCol: sql.VARCHAR(8),
@@ -7,14 +7,19 @@ const dbTables{
 };
 
 // Create connection pool and return request object
-async function dbConnect(){
-    pool = pool || await sql.connect(utils.connectionObj);
-    return await pool.request();
+async function dbConnect() {
+    try {
+        pool = pool || await sql.connect(utils.connectionObj);
+        return (await pool.request());
+    } catch(e) {
+        // log error and return false
+        return false;
+    }
 }
 
 // Insert "entries" into "table" in DB.
-async function dbInsert(table, entries){
-    try{
+async function dbInsert(table, entries) {
+    try {
         // Verify table then set up DB connection
         if(!Object.keys(dbTables).includes(table)) return false;
         let result = await dbConnect();
@@ -26,7 +31,7 @@ async function dbInsert(table, entries){
             values += `@${entry.field},`;
             result = result.input(entry.field, dbTables[table][entry.field], entry.val);
         });
-        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`; // .slice(0, -1)
+        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`;
 
         // Attempt insert and return success or failure result.
         return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
