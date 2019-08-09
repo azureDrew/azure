@@ -21,15 +21,14 @@ async function dbInsert(table, entries){
         let dbObj = dbTables[table];
 
         // Create strings for sql query and build out prepared statement
-        let columns = " (";
-        let values = " VALUES(";
+        let columns, values;
         entries.forEach(entry => {
             columns += entry.field + ", ";
             values += "@" + entry.field + ", ";
             result = result.input(entry.field, dbObj[entry.field], entry.val);
         });
-        columns = columns.slice(0, -2) + ") ";
-        values += values.slice(0, -2) + ") ";
+        columns = " (" + columns.slice(0, -2) + ") ";
+        values = " VALUES(" + values.slice(0, -2) + ") ";
 
         // Attempt insert and return success or failure result.
         return (await result.query("INSERT INTO " + table + columns + values))
@@ -48,10 +47,6 @@ async function dbInsert(table, entries){
     
     
     
-    
-    
-    
-
 /*
 // Get given object's content and status by its respective table id
 getObject(type, objectId){
