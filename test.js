@@ -8,7 +8,7 @@ const dbTables = {
 
 // TODO: build actual function
 // Record error and return standardized thrown error result
-function logError(e){
+function logError (e) {
     // log error in some tbd way
     
     // Return some standard result such as the error itself or boolean
@@ -16,15 +16,15 @@ function logError(e){
 }
 
 // Create connection pool and return request object
-async function dbConnect() {
+async function dbConnect () {
     try {
         pool = pool || await sql.connect(utils.connectionObj);
         return (await pool.request());
     } catch(e) {return logError(e);}
 }
 
-// Attempt to insert "entries" into "table" in DB.
-async function dbInsert(table, entries) {
+// Attempt insert of "entries" into DB "table"
+async function dbInsert (table, entries) {
     try {
         let columns, values;
         let result = await dbConnect();
