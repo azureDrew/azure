@@ -6,22 +6,28 @@ const dbTables = {
     },
 };
 
+// TODO: build the actual function
+// Record error and return a standardized thrown error result
+function logError(e){
+    // log the error in some tbd way
+    
+    // Return some standard result such as the rror itself or a boolean
+    return false;
+}
+
 // Create connection pool and return request object
 async function dbConnect() {
     try {
         pool = pool || await sql.connect(utils.connectionObj);
         return (await pool.request());
-    } catch(e) {
-        // log error and return false
-        return false;
-    }
+    } catch(e) {return logError(e);}
 }
 
 // Insert "entries" into "table" in DB.
 async function dbInsert(table, entries) {
     try {
         // Verify table then set up DB connection
-        if(!Object.keys(dbTables).includes(table)) return false;
+        if(dbTables[table] == null) return false;
         let result = await dbConnect();
 
         // Create string for sql query and build out prepared statement
@@ -35,10 +41,7 @@ async function dbInsert(table, entries) {
 
         // Attempt insert and return success or failure result.
         return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
-    } catch(e) {
-        // log error and return false
-        return false;
-    }
+    } catch(e) {return logError(e);}
 }
 
 
@@ -48,7 +51,12 @@ async function dbInsert(table, entries) {
     
     
   
-    
+ 
+
+
+
+
+
 /*
 // Get given object's content and status by its respective table id
 getObject(type, objectId){
