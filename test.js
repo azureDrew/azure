@@ -26,16 +26,16 @@ async function dbConnect () {
 // Attempt insert of "entries" into DB "table"
 async function dbInsert (table, entries) {
     try {
-        let columns, values;
+        let cols, vals;
         let result = await dbConnect();
         entries.forEach(entry => {
-            columns += `${entry.field},`;
-            values += `@${entry.field},`;
+            cols += `${entry.field},`;
+            vals += `@${entry.field},`;
             result = result.input(entry.field, dbTables[table][entry.field], entry.val);
         });
-        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`; //.slice(0,-1)
+        let queryStr = `INSERT INTO ${table} (${cols}) VALUES(${vals})`; //.slice(0,-1)
         return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
-    } catch(e) {return logError(e);}
+    } catch (e) {return logError(e);}
 }
 
 
