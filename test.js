@@ -6,29 +6,34 @@ const dbTables{
     },
 };
 
+// Create connection pool and return request object
+async function dbConnect(){
+    pool = pool || await sql.connect(utils.connectionObj);
+    return await pool.request();
+}
+
 // Insert "entries" into "table" in DB.
 async function dbInsert(table, entries){
     try{
         // Verify table then set up DB connection
         if(!Object.keys(dbTables).includes(table)) return false;
-        pool = pool || await sql.connect(utils.connectionObj);
-        let result = await pool.request();
-        const dbObj = dbTables[table];
+        let result = await dbConnect();
+        let dbObj = dbTables[table];
 
         // Create strings for sql query and build out prepared statement
         let columns = " (";
-        let values = " VALUES( ";
+        let values = " VALUES(";
         entries.forEach(entry => {
             columns += entry.field + ", ";
             values += "@" + entry.field + ", ";
             result = result.input(entry.field, dbObj[entry.field], entry.val);
         });
-        columns = columns.slice(0, -1) + ") ";
-        values = values.slice(0, -1) + ") ";
+        columns = columns.slice(0, -2) + ") ";
+        values += values.slice(0, -2) + ") ";
 
         // Attempt insert and return success or failure result.
-        result = await result.query("INSERT INTO " + table + columns + values);
-        return result.rowsAffected == 1 ? true : false;
+        return (await result.query("INSERT INTO " + table + columns + values))
+            .rowsAffected == 1 ? true : false;
     } catch(e) {
         // log error and return false
         return false;
