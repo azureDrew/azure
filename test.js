@@ -6,12 +6,12 @@ const dbTables = {
     },
 };
 
-// TODO: build the actual function
-// Record error and return a standardized thrown error result
+// TODO: build actual function
+// Record error and return standardized thrown error result
 function logError(e){
-    // log the error in some tbd way
+    // log error in some tbd way
     
-    // Return some standard result such as the rror itself or a boolean
+    // Return some standard result such as the error itself or boolean
     return false;
 }
 
