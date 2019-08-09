@@ -35,7 +35,7 @@ async function dbInsert (table, entries) {
         });
         let queryStr = `INSERT INTO ${table} (${cols}) VALUES(${vals})`; //.slice(0,-1)
         return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
-    } catch (e) {return logError(e);}
+    } catch(e) {return logError(e);}
 }
 
 
