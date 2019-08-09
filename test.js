@@ -19,25 +19,22 @@ async function dbInsert(table, entries){
         if(!Object.keys(dbTables).includes(table)) return false;
         let result = await dbConnect();
 
-        // Create strings for sql query and build out prepared statement
+        // Create string for sql query and build out prepared statement
         let columns, values;
         entries.forEach(entry => {
             columns += `${entry.field},`;
             values += `@${entry.field},`;
             result = result.input(entry.field, dbTables[table][entry.field], entry.val);
         });
-        columns = `(${columns.slice(0, -1)})`;
-        values = `VALUES(${values.slice(0, -1)})`;
+        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`; // .slice(0, -1)
 
         // Attempt insert and return success or failure result.
-        return (await result.query(`INSERT INTO ${table} ${columns} ${values}`))
-            .rowsAffected == 1 ? true : false;
+        return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
     } catch(e) {
         // log error and return false
         return false;
     }
 }
-
 
 
 
