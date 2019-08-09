@@ -1,4 +1,4 @@
-utils.dbFieldTypeMap = {
+/*utils.dbFieldTypeMap = {
     userId: sql.Int,
     postId: sql.Int,
     postCommentId: sql.Int,
@@ -20,24 +20,26 @@ utils.dbObjects = ["user", "post", "group"];
 utils.dbPartialObjects = ["comment", "tag", "member"];
 
 // List of all table names in DB
-utils.dbTableNames = ["" /* ... */];
+utils.dbTableNames = [""]; // ...
 
 async function checkUserPermission(userId){
     return true;
 }
+*/
+
+
+
+
 
 // Insert "entries" into "table" in DB.
 async function dbInsert(table, entries){
     try{
-        // If "table" is not a table in DB, return false
+        // Verify table then set up DB connection
         if(!utils.dbTableNames.includes(table)) return false;
-        
-        // Set up connection pool and establish query request
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request();
 
-        // Create strings for the sql query.
-        // Build out prepared statement (result).
+        // Create strings for sql query and build out prepared statement
         let columns = " (";
         let values = " VALUES( ";
         let entriesLength = Object.keys(entries).length() - 1;
@@ -56,6 +58,13 @@ async function dbInsert(table, entries){
     }
 }
 
+
+
+
+
+
+
+/*
 // Get given object's content and status by its respective table id
 getObject(type, objectId){
     try{
@@ -84,27 +93,6 @@ getObject(type, objectId){
     }
 }
 
-// Get list of (content, status) objects by a common superObject's respective id
-/*getSubObjects(type, superType, superId){
-    try{
-        // If "type" or "superType" is not an allowed object type, return false
-        if(!utils.dbObjects.includes(type)) return false;
-        if(!utils.dbObjects.includes(superType)) return false;
-        
-        // Set up connection pool, build prepared query, and send query
-        pool = pool || await sql.connect(utils.connectionObj);
-        let result = await pool.request()
-            .input()
-            .query();
-        
-        // Return list of objects contents and statuses
-        return result.recordsets[0][0];
-    } catch(e) {
-        // log error and return false
-        return false;
-    }
-}*/
-
 // Get list of recommendations for similar objects to object by id
 getRecommendations(type, objectId){
     try{
@@ -127,23 +115,4 @@ getRecommendations(type, objectId){
         return false;
     }
 }
-
-// Get list of partial objects by super object's id
-/*getPartialObjects(type, objectId){
-    try{
-        // If "type" or "superType" is not an allowed object type, return false
-        if(!utils.dbPartialObjects.includes(type)) return false;
-        
-        // Set up connection pool, build prepared query, and send query
-        pool = pool || await sql.connect(utils.connectionObj);
-        let result = await pool.request()
-            .input("id", sql.Int, objectId)
-            .query();
-        
-        // Return recommendations for objects
-        return result.recordsets.length == 1 ? JSON.parse(result.recordsets[0]) : false;
-    } catch(e) {
-        // log error and return false
-        return false;
-    }
-}*/
+*/
