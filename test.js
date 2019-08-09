@@ -35,7 +35,36 @@ async function dbInsert (table, entries) {
         });
         let queryStr = `INSERT INTO ${table} (${cols}) VALUES(${vals})`; //.slice(0,-1)
         return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
-    } catch(e) {return logError(e);}
+    } catch (e) {return logError(e);}
+}
+
+// Attempt batch insert of "batch" "entries" into DB "table"
+// Note: all rows being inserted must be for DB "table"
+async function dbBatchInsert (table, batch) {
+    try {
+        let queryStr, cols, vals;
+        let result = await dbConnect();
+        for(a = 0; a < batch.length() && a < MAX_BATCH_SIZE; a++){
+            cols = "";
+            vals = "";
+            batch[a].forEach(entry => {
+                cols += `${entry.field + a},`;
+                vals += `@${entry.field + a},`;
+                result = result.input(entry.field + a, dbTables[table][entry.field], entry.val);
+            });
+            queryStr += `INSERT INTO ${table} (${cols}) VALUES(${vals}); `;
+        };
+        return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
+    } catch (e) {return logError(e);}
+}
+
+
+// Attempt batch insert of "batch" "entries" into DB "table"
+// Note: all rows being inserted must be for DB "table"
+async function dbBatchInsert (table, batch) {
+    for(a = 0; a < batch.length() && a < MAX_BATCH_SIZE; a++){
+        if(!dbInsert(table, batch[a])) return false;
+    }
 }
 
 
@@ -46,6 +75,13 @@ async function dbInsert (table, entries) {
     
   
  
+
+
+
+
+
+
+
 
 
 
