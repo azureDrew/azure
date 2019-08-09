@@ -6,8 +6,6 @@ const dbTables{
     },
 };
 
-
-
 // Insert "entries" into "table" in DB.
 async function dbInsert(table, entries){
     try{
@@ -15,20 +13,21 @@ async function dbInsert(table, entries){
         if(!Object.keys(dbTables).includes(table)) return false;
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request();
-        let dbObject = dbTables[table];
+        const dbObj = dbTables[table];
 
         // Create strings for sql query and build out prepared statement
         let columns = " (";
         let values = " VALUES( ";
-        let entryCount = Object.keys(entries).length() - 1;
-        entries.forEach((entry, counter) => {
-            columns += entry.field + (counter != entryCount ? ", " : ") ");
-            values += "@" + entry.field + (counter != entryCount ? ", " : ") ");
-            result = result.input(entry.field, dbObject[entry.field], entry.val);
+        entries.forEach(entry => {
+            columns += entry.field + ", ";
+            values += "@" + entry.field + ", ";
+            result = result.input(entry.field, dbObj[entry.field], entry.val);
         });
+        columns = columns.slice(0, -1) + ") ";
+        values = values.slice(0, -1) + ") ";
 
         // Attempt insert and return success or failure result.
-        result = await result.query("INSERT INTO " + table + " " + columns + values);
+        result = await result.query("INSERT INTO " + table + columns + values);
         return result.rowsAffected == 1 ? true : false;
     } catch(e) {
         // log error and return false
@@ -41,6 +40,12 @@ async function dbInsert(table, entries){
 
 
 
+    
+    
+    
+    
+    
+    
 
 /*
 // Get given object's content and status by its respective table id
