@@ -26,8 +26,8 @@ async function dbInsert(table, entries){
             values += `@${entry.field},`;
             result = result.input(entry.field, dbTables[table][entry.field], entry.val);
         });
-        columns = `(${columns.slice(0, -2)})`;
-        values = `VALUES(${values.slice(0, -2)})`;
+        columns = `(${columns.slice(0, -1)})`;
+        values = `VALUES(${values.slice(0, -1)})`;
 
         // Attempt insert and return success or failure result.
         return (await result.query(`INSERT INTO ${table} ${columns} ${values}`))
