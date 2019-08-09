@@ -33,7 +33,7 @@ async function dbInsert(table, entries) {
             values += `@${entry.field},`;
             result = result.input(entry.field, dbTables[table][entry.field], entry.val);
         });
-        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`; //.splice(0,-1)
+        let queryStr = `INSERT INTO ${table} (${columns}) VALUES(${values})`; //.slice(0,-1)
         return (await result.query(queryStr)).rowsAffected == 1 ? true : false;
     } catch(e) {return logError(e);}
 }
