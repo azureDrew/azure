@@ -1,33 +1,10 @@
-/*utils.dbFieldTypeMap = {
-    userId: sql.Int,
-    postId: sql.Int,
-    postCommentId: sql.Int,
-    groupId: sql.Int,
-    groupMemberId: sql.Int,
-    commentId: sql.Int,
-    tagId: sql.Int,
-    title: sql.VarChar(256), 
-    description: sql.VarChar(2048),
-    imageUrl: sql.VarChar(256),
-    status: sql.TinyInt
-    // ...
-}
-
-// Objects in DB represented by (object, objectStatus, objectContent) triplett of tables
-utils.dbObjects = ["user", "post", "group"];
-
-// Objects in DB represented by (object, objectStatus) pair of tables
-utils.dbPartialObjects = ["comment", "tag", "member"];
-
-// List of all table names in DB
-utils.dbTableNames = [""]; // ...
-
-async function checkUserPermission(userId){
-    return true;
-}
-*/
-
-
+const dbTables{
+    testTableUno: {
+        myFirstCol: sql.VARCHAR(32),
+        mySecondCol: sql.VARCHAR(8),
+        theThirdstCol: sql.INT,
+    },
+};
 
 
 
@@ -35,18 +12,19 @@ async function checkUserPermission(userId){
 async function dbInsert(table, entries){
     try{
         // Verify table then set up DB connection
-        if(!utils.dbTableNames.includes(table)) return false;
+        if(!Object.keys(dbTables).includes(table)) return false;
         pool = pool || await sql.connect(utils.connectionObj);
         let result = await pool.request();
+        let dbObject = dbTables[table];
 
         // Create strings for sql query and build out prepared statement
         let columns = " (";
         let values = " VALUES( ";
-        let entriesLength = Object.keys(entries).length() - 1;
+        let entryCount = Object.keys(entries).length() - 1;
         entries.forEach((entry, counter) => {
-            columns += entry.field + (counter != entriesLength ? ", " : ") ");
-            values += "@" + entry.field + (counter != entriesLength ? ", " : ") ");
-            result = result.input(entry.field, utils.dbFieldTypeMap[entry.field], entry.val);
+            columns += entry.field + (counter != entryCount ? ", " : ") ");
+            values += "@" + entry.field + (counter != entryCount ? ", " : ") ");
+            result = result.input(entry.field, dbObject[entry.field], entry.val);
         });
 
         // Attempt insert and return success or failure result.
