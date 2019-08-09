@@ -22,15 +22,15 @@ async function dbInsert(table, entries){
         // Create strings for sql query and build out prepared statement
         let columns, values;
         entries.forEach(entry => {
-            columns += entry.field + ", ";
-            values += "@" + entry.field + ", ";
+            columns += `${entry.field},`;
+            values += `@${entry.field},`;
             result = result.input(entry.field, dbTables[table][entry.field], entry.val);
         });
-        columns = " (" + columns.slice(0, -2) + ") ";
-        values = " VALUES(" + values.slice(0, -2) + ") ";
+        columns = `(${columns.slice(0, -2)})`;
+        values = `VALUES(${values.slice(0, -2)})`;
 
         // Attempt insert and return success or failure result.
-        return (await result.query("INSERT INTO " + table + columns + values))
+        return (await result.query(`INSERT INTO ${table} ${columns} ${values}`))
             .rowsAffected == 1 ? true : false;
     } catch(e) {
         // log error and return false
