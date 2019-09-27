@@ -1,0 +1,140 @@
+<html>
+    <head>
+
+    </head>
+
+    <style>
+        body{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            padding: 0px;
+            min-width: 100%;
+            min-height: 100%;
+            background-color: rgb(235,235,235);
+        }
+
+        .maze{
+            position: relative;
+            float: none;
+            width: 775px;
+            height: 775px;
+            top: 50px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            background-color: rgb(121, 124, 141);
+            box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+            -webkit-box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+        }
+
+        .tile{
+            position: absolute;
+            float: none;
+            border: none;
+            margin: 0px;
+            padding: 0px;
+            width: 25px;
+            height: 25px;
+            background-color: rgb(35,35,35);
+        }
+    </style>
+
+    <body>
+        <div class = 'maze' id = 'maze'>
+            <button onclick="step(1)">Forward</button>
+            <button onclick="step(-1)">Backward</button>
+            <div id = 'map'></div>
+        </div>
+
+        <script>
+            var url = new URL(window.location.href);
+            var seed = url.searchParams.get("seed");
+            var mapSize = url.searchParams.get("size") || 30;
+
+            Math.seed = seed || Math.random();
+            Math.seededRandom = function() {
+                Math.seed = (Math.seed * 9301 + 49297) % 233280;
+                var rnd = Math.seed / 233280;
+                return rnd;
+            }
+
+            function wait(ms){
+                var start = new Date().getTime();
+                var end = start;
+                while(end < start + ms) {
+                    end = new Date().getTime();
+                }
+            }
+
+            function drawMap(map){
+                str = '';
+                for(let a = 1; a < map.length - 1; a++){
+                    for(let b = 1; b < map[a].length - 1; b++){
+                        let top = a * 25 + a;
+                        let left = b * 25 + b;
+                        if(map[a][b] == 1) str += `
+                            <div class = "tile" style = "top: ${top}; left: ${left}"></div>
+                        `;
+                    }
+                }
+                document.getElementById("map").innerHTML = str;
+                document.getElementById("maze").style.width = map.length * 25 + map.length; 
+                document.getElementById("maze").style.height = map.length * 25 + map.length; 
+            }
+
+            function updateMap(map){
+                let map2 = map;
+                for(let a = 1; a < map.length - 1; a++){
+                    for(let b = 1; b < map[a].length - 1; b++){
+                        if(map[a][b] == 0){
+                            if(map[a-1][b-1] + map[a-1][b] + map[a-1][b+1] +
+                            map[a][b-1] + map[a][b+1] + map[a+1][b-1] +
+                            map[a+1][b] + map[a+1][b+1] > 4) map2[a][b] = 1;
+                        } else {
+                            if(map[a-1][b-1] + map[a-1][b] + map[a-1][b+1] +
+                            map[a][b-1] + map[a][b+1] + map[a+1][b-1] +
+                            map[a+1][b] + map[a+1][b+1] < 4) map2[a][b] = 0;
+                        }
+                    }
+                }
+                return map2;
+            }
+
+            let myMap = [];
+            for(let a = 0; a < mapSize; a++){
+                let tmp = [];
+                for(let b = 0; b < mapSize; b++){
+                    if(Math.seededRandom() >= .45 &&
+                    a != 0 && b != 0 && a != mapSize - 1 && b != mapSize - 1) tmp.push(1);
+                    else tmp.push(0);
+                }
+                myMap.push(tmp);
+            }
+
+            let numIterations = 0;
+            function step(direction){
+                numIterations += direction;
+                if(numIterations < 0) numIterations = 0;
+                if(numIterations > 10) numIterations = 10;
+
+                let map = [];
+                for(let a = 0; a < myMap.length; a++){
+                    let tmp = [];
+                    for(let b = 0; b < myMap[a].length; b++){
+                        if(myMap[a][b] == 1) tmp.push(1);
+                        else tmp.push(0);
+                    }
+                    map.push(tmp);
+                }
+
+                for(let a = 0; a < numIterations; a++)
+                    map = updateMap(map);
+                drawMap(map);
+                console.log(numIterations);
+            }
+            step(numIterations);
+
+        </script>
+    </body>
+</html>

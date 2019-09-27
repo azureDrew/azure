@@ -1,0 +1,119 @@
+<html>
+    <head>
+        <script>
+            let tileSize = 25;
+            let defaultMapSize = 30;
+            let defaultNumIterations = 10;
+            let defaultSeedingRatio = .5;
+            let url = new URL(window.location.href); 
+        </script>
+    </head>
+
+    <style>
+        body{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            padding: 0px;
+            min-width: 100%;
+            min-height: 100%;
+            background-color: rgb(235,235,235);
+        }
+
+        .maze{
+            position: relative;
+            float: none;
+            width: 775px;
+            height: 775px;
+            top: 50px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            background-color: rgb(183, 186, 201);
+            box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+            -webkit-box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+        }
+
+        .tile{
+            position: absolute;
+            float: none;
+            border: none;
+            margin: 0px;
+            padding: 0px;
+            width: 25px;
+            height: 25px;
+            background-color: rgba(35,35,35, .25);
+        }
+    </style>
+
+    <body>
+        <div class = 'maze' id = 'maze'>
+            <div id = 'map'></div>
+        </div>
+
+        <script>
+            let copyMap = (map) => JSON.parse(JSON.stringify(map));
+
+            function cycleThroughMap (map, f) {
+                for(let a = 1; a < map.length - 1; a++)
+                    for(let b = 1; b < map[a].length - 1; b++)
+                        f(a, b);
+            }
+
+            function cycleAutomata (map) {
+                let sumNeighbors = (a, b) => map[a-1][b-1] + map[a-1][b] + map[a-1][b+1] +
+                    map[a][b-1] + map[a][b+1] + map[a+1][b-1] + map[a+1][b] + map[a+1][b+1];
+
+                let tmpMap = copyMap(map);
+                cycleThroughMap(map, function f(a, b){
+                    if(map[a][b] == 0) tmpMap[a][b] = sumNeighbors(a, b) > 4 ? 1 : 0;
+                    else tmpMap[a][b] = sumNeighbors(a, b) < 4 ? 0 : 1;
+                });
+
+                return tmpMap;
+            }
+
+            function createMap (seed, mapSize, numIterations, r) {
+                let map = Array(mapSize).fill(null).map(() => Array(mapSize).fill(0));
+
+                Math.seed = seed;
+                Math.seededRandom = () => {
+                    Math.seed = (Math.seed * 9301 + 49297) % 233280;
+                    return Math.seed / 233280;
+                }
+
+                cycleThroughMap(map, function f(a, b){
+                    if(Math.seededRandom() >= r) map[a][b] = 1;
+                });
+
+                for(let a = 0; a < numIterations; a++)
+                    map = copyMap(cycleAutomata(map));
+                
+                return map;
+            }
+
+            function drawMap (map) {
+                let str = '';
+                cycleThroughMap(map, function f(a, b) {
+                    if(map[a][b] == 1) str += `<div class = "tile" style = "top: 
+                        ${a * tileSize + a}; left: ${b * tileSize + b}"></div>`;
+                });
+
+                let length = map.length * tileSize + map.length;
+                document.getElementById("map").innerHTML += str;
+                document.getElementById("maze").style.width = length;
+                document.getElementById("maze").style.height = length;
+            }
+
+            window.onload = () => {
+                for(let a = 0; a < 5; a++)
+                    drawMap(createMap(
+                        Number(url.searchParams.get("seed")) || Math.random(), 
+                        Number(url.searchParams.get("size")) || defaultMapSize,
+                        Number(url.searchParams.get("numIterations")) || defaultNumIterations,
+                        defaultSeedingRatio + (.05 * a)
+                    ));
+            };
+        </script>
+    </body>
+</html>
